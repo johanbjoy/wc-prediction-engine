@@ -1,7 +1,7 @@
 name: Daily World Cup Engine Run
 on:
   schedule:
-    - cron: '0 1 * * *' # Runs every day at 1:00 AM UTC (6:30 AM IST)
+    - cron: '0 1,13 * * *' # Runs every day at 1:00 AM UTC (6:30 AM IST) and 1:00 PM UTC (6:30 PM IST)
   workflow_dispatch: # Allows you to run it manually from GitHub
 
 jobs:
