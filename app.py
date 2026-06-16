@@ -33,28 +33,26 @@ if fixtures:
         h_flag = flags.get(home, "⚽")
         a_flag = flags.get(away, "⚽")
 
-        card = f"""
-        <div style="background-color: #202124; border: 1px solid #3c4043; border-radius: 8px; padding: 16px; font-family: Roboto, Arial, sans-serif;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                <span style="color: #9aa0a6; font-size: 0.85rem;">World Cup 2026</span>
-                <span style="color: #9aa0a6; font-size: 0.85rem; text-align: right;">{status}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-size: 1.2rem;">{h_flag}</span>
-                    <span style="color: #e8eaed; font-size: 1rem;">{home}</span>
-                </div>
-                <span style="color: #e8eaed; font-size: 1.1rem; font-weight: 500;">{h_score}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-size: 1.2rem;">{a_flag}</span>
-                    <span style="color: #e8eaed; font-size: 1rem;">{away}</span>
-                </div>
-                <span style="color: #e8eaed; font-size: 1.1rem; font-weight: 500;">{a_score}</span>
-            </div>
+        card = f"""<div style="background-color: #202124; border: 1px solid #3c4043; border-radius: 8px; padding: 16px; font-family: Roboto, Arial, sans-serif;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <span style="color: #9aa0a6; font-size: 0.85rem;">World Cup 2026</span>
+        <span style="color: #9aa0a6; font-size: 0.85rem; text-align: right;">{status}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.2rem;">{h_flag}</span>
+            <span style="color: #e8eaed; font-size: 1rem;">{home}</span>
         </div>
-        """
+        <span style="color: #e8eaed; font-size: 1.1rem; font-weight: 500;">{h_score}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.2rem;">{a_flag}</span>
+            <span style="color: #e8eaed; font-size: 1rem;">{away}</span>
+        </div>
+        <span style="color: #e8eaed; font-size: 1.1rem; font-weight: 500;">{a_score}</span>
+    </div>
+</div>"""
         html_cards += card
         
     html_cards += "</div>"
@@ -136,28 +134,26 @@ if predictions:
         else:
             pill = "<span style='background-color:#3c4043; color:#9aa0a6; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>PENDING</span>"
 
-        card = f"""
-        <div style="background-color: #202124; border: 1px solid #3c4043; border-radius: 8px; padding: 16px; font-family: Roboto, Arial, sans-serif;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                <span style="color: #9aa0a6; font-size: 0.75rem; text-transform: uppercase;">Engine Prediction</span>
-                {pill}
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-size: 1.2rem;">{h_flag}</span>
-                    <span style="color: #e8eaed; font-size: 1rem;">{home}</span>
-                </div>
-                <span style="color: #8ab4f8; font-size: 1.2rem; font-weight: bold;">{pred_h}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-size: 1.2rem;">{a_flag}</span>
-                    <span style="color: #e8eaed; font-size: 1rem;">{away}</span>
-                </div>
-                <span style="color: #8ab4f8; font-size: 1.2rem; font-weight: bold;">{pred_a}</span>
-            </div>
+        card = f"""<div style="background-color: #202124; border: 1px solid #3c4043; border-radius: 8px; padding: 16px; font-family: Roboto, Arial, sans-serif;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <span style="color: #9aa0a6; font-size: 0.75rem; text-transform: uppercase;">Engine Prediction</span>
+        {pill}
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.2rem;">{h_flag}</span>
+            <span style="color: #e8eaed; font-size: 1rem;">{home}</span>
         </div>
-        """
+        <span style="color: #8ab4f8; font-size: 1.2rem; font-weight: bold;">{pred_h}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.2rem;">{a_flag}</span>
+            <span style="color: #e8eaed; font-size: 1rem;">{away}</span>
+        </div>
+        <span style="color: #8ab4f8; font-size: 1.2rem; font-weight: bold;">{pred_a}</span>
+    </div>
+</div>"""
         html_cards += card
         
     html_cards += "</div>"
