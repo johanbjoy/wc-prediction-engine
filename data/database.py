@@ -149,6 +149,55 @@ def get_recent_predictions(limit: int = 15) -> list[dict]:
         conn.close()
 
 
+def get_leaderboard() -> list[dict]:
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    l.model_name,
+                    l.total_points,
+                    l.exact_scores_count,
+                    COUNT(p.id)                                                AS total_preds,
+                    SUM(CASE WHEN p.points_awarded > 0 THEN 1 ELSE 0 END)        AS correct_outcomes,
+                    SUM(CASE WHEN p.points_awarded IS NOT NULL THEN 1 ELSE 0 END) AS scored_preds
+                FROM leaderboard l
+                LEFT JOIN predictions p ON p.model_name = l.model_name
+                GROUP BY l.model_name
+                ORDER BY l.total_points DESC, l.exact_scores_count DESC
+            """)
+            rows = cur.fetchall()
+            return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+def get_summary() -> dict:
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM predictions WHERE points_awarded IS NOT NULL")
+            total = cur.fetchone()["count"]
+
+            cur.execute("SELECT COUNT(*) FROM predictions WHERE points_awarded = 3")
+            exact = cur.fetchone()["count"]
+
+            cur.execute("SELECT COUNT(*) FROM predictions WHERE points_awarded > 0")
+            correct = cur.fetchone()["count"]
+
+            cur.execute("SELECT COUNT(*) FROM predictions WHERE points_awarded IS NULL")
+            pending = cur.fetchone()["count"]
+
+        return {
+            "total":    total,
+            "exact":    exact,
+            "correct":  correct,
+            "pending":  pending,
+            "acc_pct":  round(correct / total * 100, 1) if total else 0.0,
+            "exact_pct": round(exact / total * 100, 1) if total else 0.0,
+        }
+    finally:
+        conn.close()
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     init_db()

@@ -1,13 +1,52 @@
 import streamlit as st
-from data.database import get_recent_predictions
 import pandas as pd
+from data.database import get_recent_predictions, get_leaderboard, get_summary
 
 st.set_page_config(page_title="World Cup Engine", layout="wide")
 
 st.title("🏆 World Cup 2026 Prediction Engine")
 st.write("Powered by an XGBoost & Poisson Ensemble Model")
+st.markdown("---")
 
-# Fetch data from existing Supabase connection
+# 1. SUMMARY METRICS
+st.subheader("Live Accuracy Metrics")
+stats = get_summary()
+
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.metric(label="Total Predictions Scored", value=stats["total"])
+with col2:
+    st.metric(label="Exact Score Hits", value=stats["exact"])
+with col3:
+    st.metric(label="Exact Score %", value=f"{stats['exact_pct']}%")
+with col4:
+    st.metric(label="Correct Outcome %", value=f"{stats['acc_pct']}%")
+
+st.markdown("---")
+
+# 2. LEADERBOARD
+st.subheader("Model Leaderboard")
+leaderboard = get_leaderboard()
+
+if leaderboard:
+    # Clean up the raw leaderboard data for display
+    formatted_lb = []
+    for rank, l in enumerate(leaderboard, 1):
+        formatted_lb.append({
+            "Rank": f"#{rank}",
+            "Model": l['model_name'],
+            "Points": l['total_points'] or 0,
+            "Exact Scores": l['exact_scores_count'] or 0,
+            "Accuracy": f"{round((l['correct_outcomes'] or 0) / (l['scored_preds'] or 1) * 100, 1)}%"
+        })
+    df_lb = pd.DataFrame(formatted_lb)
+    st.dataframe(df_lb, use_container_width=True, hide_index=True)
+else:
+    st.info("No models scored yet.")
+
+st.markdown("---")
+
+# 3. RECENT PREDICTIONS
 st.subheader("Recent Predictions")
 predictions = get_recent_predictions()
 
@@ -36,16 +75,3 @@ if predictions:
     st.dataframe(df, use_container_width=True, hide_index=True)
 else:
     st.info("No predictions scored yet.")
-
-# Add a button to manually trigger the orchestrator
-st.markdown("---")
-st.subheader("Live Pipeline")
-if st.button("Run Live Prediction Pipeline"):
-    with st.spinner("Running XGBoost Ensemble and querying LLM agents..."):
-        import orchestrator
-        try:
-            orchestrator.run_pipeline()
-            st.success("Prediction complete! Database updated.")
-            st.rerun() # Refresh the dataframe with the new data
-        except Exception as e:
-            st.error(f"Pipeline failed: {e}")
