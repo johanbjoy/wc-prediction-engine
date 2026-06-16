@@ -187,7 +187,12 @@ def _store_openfootball(matches: list[dict]) -> int:
             for m in matches:
                 team1 = m.get("team1", "")
                 team2 = m.get("team2", "")
-                date  = m.get("date", "")
+                raw_date = m.get("date", "")
+                time_str = m.get("time", "")
+                
+                # Combine date and time if available
+                date = f"{raw_date} {time_str}".strip() if raw_date else ""
+                
                 group = m.get("group", "")
                 ground = m.get("ground", "")
 

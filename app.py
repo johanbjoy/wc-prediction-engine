@@ -15,12 +15,9 @@ def render_prediction_cards(predictions):
         real_a = p['real_away_score']
         pts = p['points_awarded']
         
-        # Format match date string
+        # Date and Time Display
         raw_date = p.get('match_date', '')
-        if hasattr(raw_date, 'strftime'):
-            date_str = raw_date.strftime('%b %d, %Y - %H:%M')
-        else:
-            date_str = str(raw_date)[:16] if raw_date else "TBD"
+        date_str = str(raw_date) if raw_date else "TBD"
         
         h_flag = TEAM_FLAGS.get(home, "⚽")
         a_flag = TEAM_FLAGS.get(away, "⚽")
