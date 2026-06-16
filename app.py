@@ -75,49 +75,7 @@ TEAM_FLAGS = {
     "Curaçao": "🇨🇼", "Haiti": "🇭🇹", "DR Congo": "🇨🇩"
 }
 
-# 1. LIVE MATCH SCOREBOARD
-st.subheader("Live Fixtures & Scores")
-fixtures = get_all_fixtures()
 
-if fixtures:
-    html_cards = "<div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;'>"
-    
-    for f in fixtures:
-        home, away = f['home_team'], f['away_team']
-        h_score = f['real_home_score'] if f['real_home_score'] is not None else ""
-        a_score = f['real_away_score'] if f['real_away_score'] is not None else ""
-        status = f['status'] if f['status'] else "Upcoming"
-        if status == "FT": status = "FT<br><span style='font-size:0.75rem; color:#8ab4f8;'>Today</span>"
-        
-        h_flag = TEAM_FLAGS.get(home, "⚽")
-        a_flag = TEAM_FLAGS.get(away, "⚽")
-
-        card = f"""<div style="background-color: #202124; border: 1px solid #3c4043; border-radius: 8px; padding: 16px; font-family: Roboto, Arial, sans-serif;">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-        <span style="color: #9aa0a6; font-size: 0.85rem;">World Cup 2026</span>
-        <span style="color: #9aa0a6; font-size: 0.85rem; text-align: right;">{status}</span>
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 1.2rem;">{h_flag}</span>
-            <span style="color: #e8eaed; font-size: 1rem;">{home}</span>
-        </div>
-        <span style="color: #e8eaed; font-size: 1.1rem; font-weight: 500;">{h_score}</span>
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 1.2rem;">{a_flag}</span>
-            <span style="color: #e8eaed; font-size: 1rem;">{away}</span>
-        </div>
-        <span style="color: #e8eaed; font-size: 1.1rem; font-weight: 500;">{a_score}</span>
-    </div>
-</div>"""
-        html_cards += card
-        
-    html_cards += "</div>"
-    st.markdown(html_cards, unsafe_allow_html=True)
-else:
-    st.info("No fixtures found in database.")
 
 st.markdown("---")
 
