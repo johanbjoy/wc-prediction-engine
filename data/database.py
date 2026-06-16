@@ -141,9 +141,11 @@ def get_upcoming_predictions(limit: int = 4) -> list[dict]:
                 FROM predictions p
                 JOIN fixtures f ON f.id = p.fixture_id
                 WHERE p.points_awarded IS NULL
+                AND SUBSTRING(f.match_date, 1, 10) = (
+                    SELECT SUBSTRING(match_date, 1, 10) FROM fixtures WHERE status IN ('NS','TBD','POSTP') ORDER BY match_date ASC LIMIT 1
+                )
                 ORDER BY f.match_date ASC, p.created_at DESC
-                LIMIT %s
-            """, (limit,))
+            """)
             rows = cur.fetchall()
             return [dict(r) for r in rows]
     finally:

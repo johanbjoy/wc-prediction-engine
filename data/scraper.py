@@ -310,8 +310,12 @@ def get_upcoming_fixtures(limit: int = 10) -> list[dict]:
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT id, home_team, away_team, match_date FROM fixtures
-                WHERE status IN ('NS','TBD','POSTP') ORDER BY match_date ASC LIMIT %s
-            """, (limit,))
+                WHERE status IN ('NS','TBD','POSTP') 
+                AND SUBSTRING(match_date, 1, 10) = (
+                    SELECT SUBSTRING(match_date, 1, 10) FROM fixtures WHERE status IN ('NS','TBD','POSTP') ORDER BY match_date ASC LIMIT 1
+                )
+                ORDER BY match_date ASC
+            """)
             rows = cur.fetchall()
             return [dict(r) for r in rows]
     finally:
