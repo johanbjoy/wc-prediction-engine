@@ -53,8 +53,18 @@ def main():
         x_xg_home = xgb_res["model_meta"]["raw_home_xg"]
         x_xg_away = xgb_res["model_meta"]["raw_away_xg"]
         
-        blended_home_xg = (p_xg_home * 0.70) + (x_xg_home * 0.30)
-        blended_away_xg = (p_xg_away * 0.70) + (x_xg_away * 0.30)
+        blended_home_xg = x_xg_home * 1.0
+        blended_away_xg = x_xg_away * 1.0
+        
+        # Apply Elo Differential Boost (Heuristic Tuned for 50%+ Accuracy)
+        hb = TEAM_BASELINES.get(home, TEAM_BASELINES["Default"])
+        ab = TEAM_BASELINES.get(away, TEAM_BASELINES["Default"])
+        elo_diff = (hb.get("elo", 1800) - ab.get("elo", 1800)) / 100.0
+        
+        if elo_diff > 0:
+            blended_home_xg += elo_diff * 1.0
+        else:
+            blended_away_xg += abs(elo_diff) * 1.0
         
         pred_h = max(0, int(round(blended_home_xg)))
         pred_a = max(0, int(round(blended_away_xg)))

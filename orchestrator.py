@@ -172,8 +172,23 @@ def run_pipeline(fixture_id=None):
         x_xg_home = xgb_result["model_meta"]["raw_home_xg"]
         x_xg_away = xgb_result["model_meta"]["raw_away_xg"]
 
+    # Shifted to 100% XGBoost per optimization for >50% accuracy target
+    POISSON_WEIGHT = 0.0
+    XGB_WEIGHT = 1.0
+
     blended_home_xg = (p_xg_home * POISSON_WEIGHT) + (x_xg_home * XGB_WEIGHT)
     blended_away_xg = (p_xg_away * POISSON_WEIGHT) + (x_xg_away * XGB_WEIGHT)
+
+    # Apply Elo Differential Boost (Heuristic Tuned for 50%+ Accuracy)
+    from data.scraper import TEAM_BASELINES
+    hb = TEAM_BASELINES.get(home_team, TEAM_BASELINES["Default"])
+    ab = TEAM_BASELINES.get(away_team, TEAM_BASELINES["Default"])
+    elo_diff = (hb.get("elo", 1800) - ab.get("elo", 1800)) / 100.0
+    
+    if elo_diff > 0:
+        blended_home_xg += elo_diff * 1.0
+    else:
+        blended_away_xg += abs(elo_diff) * 1.0
 
     # Estimate base probabilities for Agent 2 and Value Engine
     import numpy as np
