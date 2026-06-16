@@ -8,6 +8,22 @@ st.title("🏆 World Cup 2026 Prediction Engine")
 st.write("Powered by an XGBoost & Poisson Ensemble Model")
 st.markdown("---")
 
+# Comprehensive Flag Mapper
+TEAM_FLAGS = {
+    "Belgium": "🇧🇪", "Egypt": "🇪🇬", "Saudi Arabia": "🇸🇦", "Uruguay": "🇺🇾", 
+    "Iran": "🇮🇷", "New Zealand": "🇳🇿", "Argentina": "🇦🇷", "Algeria": "🇩🇿",
+    "France": "🇫🇷", "Senegal": "🇸🇳", "Portugal": "🇵🇹", "Brazil": "🇧🇷",
+    "USA": "🇺🇸", "Mexico": "🇲🇽", "Canada": "🇨🇦", "Spain": "🇪🇸", "Germany": "🇩🇪",
+    "Czech Republic": "🇨🇿", "Sweden": "🇸🇪", "Jordan": "🇯🇴", "Uzbekistan": "🇺🇿", 
+    "South Korea": "🇰🇷", "Colombia": "🇨🇴", "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "Cape Verde": "🇨🇻", 
+    "South Africa": "🇿🇦", "Ghana": "🇬🇭", "Japan": "🇯🇵", "Ivory Coast": "🇨🇮", 
+    "Iraq": "🇮🇶", "Turkey": "🇹🇷", "Switzerland": "🇨🇭", "Ecuador": "🇪🇨", 
+    "Norway": "🇳🇴", "Qatar": "🇶🇦", "Scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "Netherlands": "🇳🇱", 
+    "Paraguay": "🇵🇾", "Austria": "🇦🇹", "Australia": "🇦🇺", "Bosnia & Herzegovina": "🇧🇦", 
+    "Panama": "🇵🇦", "Croatia": "🇭🇷", "Tunisia": "🇹🇳", "Morocco": "🇲🇦", 
+    "Curaçao": "🇨🇼", "Haiti": "🇭🇹", "DR Congo": "🇨🇩"
+}
+
 # 1. LIVE MATCH SCOREBOARD
 st.subheader("Live Fixtures & Scores")
 fixtures = get_all_fixtures()
@@ -15,14 +31,6 @@ fixtures = get_all_fixtures()
 if fixtures:
     html_cards = "<div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;'>"
     
-    # Simple flag mapper for aesthetics
-    flags = {
-        "Belgium": "🇧🇪", "Egypt": "🇪🇬", "Saudi Arabia": "🇸🇦", "Uruguay": "🇺🇾", 
-        "Iran": "🇮🇷", "New Zealand": "🇳🇿", "Argentina": "🇦🇷", "Algeria": "🇩🇿",
-        "France": "🇫🇷", "Senegal": "🇸🇳", "Portugal": "🇵🇹", "Brazil": "🇧🇷",
-        "USA": "🇺🇸", "Mexico": "🇲🇽", "Canada": "🇨🇦", "Spain": "🇪🇸", "Germany": "🇩🇪"
-    }
-
     for f in fixtures:
         home, away = f['home_team'], f['away_team']
         h_score = f['real_home_score'] if f['real_home_score'] is not None else ""
@@ -30,8 +38,8 @@ if fixtures:
         status = f['status'] if f['status'] else "Upcoming"
         if status == "FT": status = "FT<br><span style='font-size:0.75rem; color:#8ab4f8;'>Today</span>"
         
-        h_flag = flags.get(home, "⚽")
-        a_flag = flags.get(away, "⚽")
+        h_flag = TEAM_FLAGS.get(home, "⚽")
+        a_flag = TEAM_FLAGS.get(away, "⚽")
 
         card = f"""<div style="background-color: #202124; border: 1px solid #3c4043; border-radius: 8px; padding: 16px; font-family: Roboto, Arial, sans-serif;">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
@@ -107,13 +115,6 @@ predictions = get_recent_predictions()
 if predictions:
     html_cards = "<div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;'>"
     
-    flags = {
-        "Belgium": "🇧🇪", "Egypt": "🇪🇬", "Saudi Arabia": "🇸🇦", "Uruguay": "🇺🇾", 
-        "Iran": "🇮🇷", "New Zealand": "🇳🇿", "Argentina": "🇦🇷", "Algeria": "🇩🇿",
-        "France": "🇫🇷", "Senegal": "🇸🇳", "Portugal": "🇵🇹", "Brazil": "🇧🇷",
-        "USA": "🇺🇸", "Mexico": "🇲🇽", "Canada": "🇨🇦", "Spain": "🇪🇸", "Germany": "🇩🇪"
-    }
-
     for p in predictions:
         home, away = p['home_team'], p['away_team']
         pred_h, pred_a = p['predicted_home_score'], p['predicted_away_score']
@@ -121,8 +122,8 @@ if predictions:
         real_a = p['real_away_score']
         pts = p['points_awarded']
         
-        h_flag = flags.get(home, "⚽")
-        a_flag = flags.get(away, "⚽")
+        h_flag = TEAM_FLAGS.get(home, "⚽")
+        a_flag = TEAM_FLAGS.get(away, "⚽")
 
         # Visual pill for the actual result
         if pts == 3:
