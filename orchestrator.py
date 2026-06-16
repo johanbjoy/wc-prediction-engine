@@ -81,18 +81,18 @@ def _prediction_exists(fixture_id: int, model_name: str) -> dict | None:
     finally:
         conn.close()
 
-def _save_prediction(fixture_id: int, model_name: str, home: int, away: int) -> None:
-    """Store prediction result."""
+def _save_prediction(fixture_id: int, model_name: str, home: int, away: int, meta_json: str = None) -> None:
+    """Store prediction result with analytical metadata."""
     conn = get_connection()
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO predictions (fixture_id, model_name, predicted_home_score, predicted_away_score) 
-                VALUES (%s,%s,%s,%s)
-                ON CONFLICT (fixture_id, model_name) DO NOTHING
+                INSERT INTO predictions (fixture_id, model_name, predicted_home_score, predicted_away_score, meta_json) 
+                VALUES (%s,%s,%s,%s,%s)
+                ON CONFLICT (fixture_id, model_name) DO UPDATE SET meta_json = EXCLUDED.meta_json
                 """,
-                (fixture_id, model_name, home, away)
+                (fixture_id, model_name, home, away, meta_json)
             )
         conn.commit()
     finally:
@@ -276,7 +276,8 @@ def run_pipeline(fixture_id=None):
     
     logger.info(f"  Final Ensemble → {home_team} {final_pred['home_score']}-{final_pred['away_score']} {away_team}  ({meta['p_home_win']}% / {meta['p_draw']}% / {meta['p_away_win']}%)")
 
-    _save_prediction(fid, model_tag, final_pred["home_score"], final_pred["away_score"])
+    import json
+    _save_prediction(fid, model_tag, final_pred["home_score"], final_pred["away_score"], json.dumps(meta))
     logger.info(f"  ✓ Saved: {home_team} {final_pred['home_score']}-{final_pred['away_score']} {away_team} [{model_tag}]")
 
     return {"fixture_id": fid, "home_team": home_team, "away_team": away_team, "prediction": final_pred, "poisson_meta": meta, "model_name": model_tag}

@@ -61,6 +61,7 @@ def init_db() -> None:
                     predicted_home_score   INTEGER NOT NULL,
                     predicted_away_score   INTEGER NOT NULL,
                     points_awarded         INTEGER,
+                    meta_json              TEXT,
                     created_at             TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY(fixture_id) REFERENCES fixtures(id) ON DELETE CASCADE,
                     UNIQUE(fixture_id, model_name)
@@ -137,7 +138,7 @@ def get_upcoming_predictions(limit: int = 4) -> list[dict]:
                     f.real_home_score, f.real_away_score,
                     p.model_name,
                     p.predicted_home_score, p.predicted_away_score,
-                    p.points_awarded
+                    p.points_awarded, p.meta_json
                 FROM predictions p
                 JOIN fixtures f ON f.id = p.fixture_id
                 WHERE p.points_awarded IS NULL
@@ -162,7 +163,7 @@ def get_completed_predictions(limit: int = 20) -> list[dict]:
                     f.real_home_score, f.real_away_score,
                     p.model_name,
                     p.predicted_home_score, p.predicted_away_score,
-                    p.points_awarded
+                    p.points_awarded, p.meta_json
                 FROM predictions p
                 JOIN fixtures f ON f.id = p.fixture_id
                 WHERE p.points_awarded IS NOT NULL
