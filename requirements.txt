@@ -1,7 +1,8 @@
+streamlit
+python-dotenv
 psycopg2-binary
-requests
 xgboost
 pandas
 numpy
 scikit-learn
-streamlit
+requests
