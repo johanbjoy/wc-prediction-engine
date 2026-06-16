@@ -253,6 +253,96 @@ st.markdown("""
         background: linear-gradient(90deg, transparent, rgba(99,102,241,0.25), transparent);
         margin: 28px 0;
     }
+
+    /* Animated pulse for live indicator */
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-6px); }
+    }
+    .live-dot {
+        display: inline-block;
+        width: 8px; height: 8px;
+        background: #22c55e;
+        border-radius: 50%;
+        margin-right: 6px;
+        animation: pulse 2s ease-in-out infinite;
+        box-shadow: 0 0 8px rgba(34,197,94,0.5);
+    }
+    .hero-icon {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 8px;
+        animation: float 3s ease-in-out infinite;
+    }
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(99,102,241,0.1);
+        border: 1px solid rgba(99,102,241,0.2);
+        border-radius: 20px;
+        padding: 4px 14px;
+        font-size: 0.7rem;
+        color: #818cf8;
+        font-weight: 600;
+        margin-top: 12px;
+        letter-spacing: 0.04em;
+    }
+
+    /* Footer watermark */
+    .footer {
+        text-align: center;
+        padding: 40px 0 20px;
+        font-family: 'Inter', sans-serif;
+    }
+    .footer-line {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(99,102,241,0.15), transparent);
+        margin-bottom: 24px;
+    }
+    .footer-credit {
+        color: #475569;
+        font-size: 0.75rem;
+        font-weight: 400;
+        letter-spacing: 0.02em;
+    }
+    .footer-credit a {
+        color: #818cf8;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+    .footer-credit a:hover {
+        color: #a78bfa;
+    }
+    .footer-name {
+        color: #94a3b8;
+        font-weight: 700;
+        font-size: 0.8rem;
+        margin-bottom: 6px;
+    }
+    .footer-gh {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        color: #64748b;
+        font-size: 0.7rem;
+        text-decoration: none;
+        border: 1px solid rgba(100,116,139,0.2);
+        padding: 5px 14px;
+        border-radius: 20px;
+        transition: all 0.3s;
+    }
+    .footer-gh:hover {
+        color: #e2e8f0;
+        border-color: rgba(99,102,241,0.4);
+        background: rgba(99,102,241,0.08);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -386,8 +476,10 @@ def render_prediction_cards(predictions):
 # ─── HERO HEADER ───────────────────────────────────────────────────────────
 st.markdown("""
 <div class="hero">
-    <div class="hero-title">⚽ World Cup 2026 Prediction Engine</div>
-    <div class="hero-sub">Powered by <span>XGBoost</span> · Elo Heuristic · Real-Time Market Odds Blending</div>
+    <span class="hero-icon">&#9917;</span>
+    <div class="hero-title">World Cup 2026 Prediction Engine</div>
+    <div class="hero-sub">Powered by <span>XGBoost</span> &middot; Elo Heuristic &middot; Real-Time Market Odds Blending</div>
+    <div class="hero-badge"><span class="live-dot"></span>AUTONOMOUS &middot; HOURLY UPDATES</div>
 </div>
 <div class="divider"></div>
 """, unsafe_allow_html=True)
@@ -446,3 +538,16 @@ if leaderboard:
     st.dataframe(df_lb, use_container_width=True, hide_index=True)
 else:
     st.info("No models scored yet.")
+
+# ─── FOOTER / WATERMARK ────────────────────────────────────────────────────
+st.markdown("""
+<div class="footer">
+    <div class="footer-line"></div>
+    <div class="footer-name">Built by Johan B Joy</div>
+    <div class="footer-credit">AI-Powered Autonomous Prediction Engine &middot; FIFA World Cup 2026&trade;</div>
+    <a class="footer-gh" href="https://github.com/johanbjoy/wc-prediction-engine" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        View on GitHub
+    </a>
+</div>
+""", unsafe_allow_html=True)
