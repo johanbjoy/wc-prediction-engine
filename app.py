@@ -107,27 +107,60 @@ st.subheader("Recent Predictions")
 predictions = get_recent_predictions()
 
 if predictions:
-    # Clean up the raw data into a beautiful, readable format
-    formatted_data = []
-    for p in predictions:
-        match = f"{p['home_team']} vs {p['away_team']}"
-        pred = f"{p['predicted_home_score']}-{p['predicted_away_score']}"
-        
-        if p['real_home_score'] is not None:
-            actual = f"{p['real_home_score']}-{p['real_away_score']}"
-        else:
-            actual = "TBD"
-            
-        formatted_data.append({
-            "Match": match,
-            "Prediction": pred,
-            "Actual Result": actual,
-            "Points": p['points_awarded'] if p['points_awarded'] is not None else "-",
-            "Model": p['model_name'],
-            "Date": p['match_date']
-        })
+    html_cards = "<div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;'>"
+    
+    flags = {
+        "Belgium": "🇧🇪", "Egypt": "🇪🇬", "Saudi Arabia": "🇸🇦", "Uruguay": "🇺🇾", 
+        "Iran": "🇮🇷", "New Zealand": "🇳🇿", "Argentina": "🇦🇷", "Algeria": "🇩🇿",
+        "France": "🇫🇷", "Senegal": "🇸🇳", "Portugal": "🇵🇹", "Brazil": "🇧🇷",
+        "USA": "🇺🇸", "Mexico": "🇲🇽", "Canada": "🇨🇦", "Spain": "🇪🇸", "Germany": "🇩🇪"
+    }
 
-    df = pd.DataFrame(formatted_data)
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    for p in predictions:
+        home, away = p['home_team'], p['away_team']
+        pred_h, pred_a = p['predicted_home_score'], p['predicted_away_score']
+        real_h = p['real_home_score']
+        real_a = p['real_away_score']
+        pts = p['points_awarded']
+        
+        h_flag = flags.get(home, "⚽")
+        a_flag = flags.get(away, "⚽")
+
+        # Visual pill for the actual result
+        if pts == 3:
+            pill = f"<span style='background-color:rgba(34,197,94,0.15); color:#22c55e; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>✓✓ EXACT ({real_h}-{real_a})</span>"
+        elif pts == 1:
+            pill = f"<span style='background-color:rgba(234,179,8,0.15); color:#eab308; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>✓ WINNER ({real_h}-{real_a})</span>"
+        elif pts == 0:
+            pill = f"<span style='background-color:rgba(239,68,68,0.15); color:#ef4444; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>✗ WRONG ({real_h}-{real_a})</span>"
+        else:
+            pill = "<span style='background-color:#3c4043; color:#9aa0a6; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>PENDING</span>"
+
+        card = f"""
+        <div style="background-color: #202124; border: 1px solid #3c4043; border-radius: 8px; padding: 16px; font-family: Roboto, Arial, sans-serif;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <span style="color: #9aa0a6; font-size: 0.75rem; text-transform: uppercase;">Engine Prediction</span>
+                {pill}
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 1.2rem;">{h_flag}</span>
+                    <span style="color: #e8eaed; font-size: 1rem;">{home}</span>
+                </div>
+                <span style="color: #8ab4f8; font-size: 1.2rem; font-weight: bold;">{pred_h}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 1.2rem;">{a_flag}</span>
+                    <span style="color: #e8eaed; font-size: 1rem;">{away}</span>
+                </div>
+                <span style="color: #8ab4f8; font-size: 1.2rem; font-weight: bold;">{pred_a}</span>
+            </div>
+        </div>
+        """
+        html_cards += card
+        
+    html_cards += "</div>"
+    st.markdown(html_cards, unsafe_allow_html=True)
 else:
     st.info("No predictions scored yet.")
