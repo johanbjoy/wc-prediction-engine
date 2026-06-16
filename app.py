@@ -376,11 +376,11 @@ def render_prediction_cards(predictions):
         """, unsafe_allow_html=True)
         return
 
-    html = '<div class="prediction-grid">'
-    for p in predictions:
-        html += _build_card(p)
-    html += '</div>'
-    st.markdown(html, unsafe_allow_html=True)
+    # Render cards in a 2-column Streamlit grid, one st.markdown per card
+    cols = st.columns(2)
+    for i, p in enumerate(predictions):
+        with cols[i % 2]:
+            st.markdown(_build_card(p), unsafe_allow_html=True)
 
 
 # ─── HERO HEADER ───────────────────────────────────────────────────────────
