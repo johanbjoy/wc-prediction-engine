@@ -15,9 +15,22 @@ def render_prediction_cards(predictions):
         real_a = p['real_away_score']
         pts = p['points_awarded']
         
-        # Date and Time Display
+        # Date and Time Display (Convert to IST)
+        import re
+        from datetime import datetime, timedelta
+        
         raw_date = p.get('match_date', '')
         date_str = str(raw_date) if raw_date else "TBD"
+        match = re.search(r'(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})\s+UTC([+-]\d+)', date_str)
+        if match:
+            d_str, t_str, offset_str = match.groups()
+            try:
+                dt = datetime.strptime(f"{d_str} {t_str}", "%Y-%m-%d %H:%M")
+                utc_dt = dt - timedelta(hours=int(offset_str))
+                ist_dt = utc_dt + timedelta(hours=5, minutes=30)
+                date_str = ist_dt.strftime("%b %d, %Y - %H:%M IST")
+            except Exception:
+                pass
         
         h_flag = TEAM_FLAGS.get(home, "⚽")
         a_flag = TEAM_FLAGS.get(away, "⚽")
