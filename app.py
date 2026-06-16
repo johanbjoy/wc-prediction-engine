@@ -1,6 +1,57 @@
 import streamlit as st
 import pandas as pd
-from data.database import get_recent_predictions, get_leaderboard, get_summary, get_all_fixtures
+from data.database import get_upcoming_predictions, get_completed_predictions, get_leaderboard, get_summary, get_all_fixtures
+
+def render_prediction_cards(predictions):
+    if not predictions:
+        st.info("No predictions in this category yet.")
+        return
+
+    html_cards = "<div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;'>"
+    for p in predictions:
+        home, away = p['home_team'], p['away_team']
+        pred_h, pred_a = p['predicted_home_score'], p['predicted_away_score']
+        real_h = p['real_home_score']
+        real_a = p['real_away_score']
+        pts = p['points_awarded']
+        
+        h_flag = TEAM_FLAGS.get(home, "⚽")
+        a_flag = TEAM_FLAGS.get(away, "⚽")
+
+        # Visual pill for the actual result
+        if pts == 3:
+            pill = f"<span style='background-color:rgba(34,197,94,0.15); color:#22c55e; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>✓✓ EXACT ({real_h}-{real_a})</span>"
+        elif pts == 1:
+            pill = f"<span style='background-color:rgba(234,179,8,0.15); color:#eab308; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>✓ WINNER ({real_h}-{real_a})</span>"
+        elif pts == 0:
+            pill = f"<span style='background-color:rgba(239,68,68,0.15); color:#ef4444; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>✗ WRONG ({real_h}-{real_a})</span>"
+        else:
+            pill = "<span style='background-color:#3c4043; color:#9aa0a6; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>PENDING</span>"
+
+        card = f"""<div style="background-color: #202124; border: 1px solid #3c4043; border-radius: 8px; padding: 16px; font-family: Roboto, Arial, sans-serif;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <span style="color: #9aa0a6; font-size: 0.75rem; text-transform: uppercase;">Engine Prediction</span>
+        {pill}
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.2rem;">{h_flag}</span>
+            <span style="color: #e8eaed; font-size: 1rem;">{home}</span>
+        </div>
+        <span style="color: #8ab4f8; font-size: 1.2rem; font-weight: bold;">{pred_h}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.2rem;">{a_flag}</span>
+            <span style="color: #e8eaed; font-size: 1rem;">{away}</span>
+        </div>
+        <span style="color: #8ab4f8; font-size: 1.2rem; font-weight: bold;">{pred_a}</span>
+    </div>
+</div>"""
+        html_cards += card
+        
+    html_cards += "</div>"
+    st.markdown(html_cards, unsafe_allow_html=True)
 
 st.set_page_config(page_title="World Cup Engine", layout="wide")
 
@@ -91,7 +142,6 @@ st.subheader("Model Leaderboard")
 leaderboard = get_leaderboard()
 
 if leaderboard:
-    # Clean up the raw leaderboard data for display
     formatted_lb = []
     for rank, l in enumerate(leaderboard, 1):
         formatted_lb.append({
@@ -108,56 +158,14 @@ else:
 
 st.markdown("---")
 
-# 4. RECENT PREDICTIONS
-st.subheader("Recent Predictions")
-predictions = get_recent_predictions()
+# 4. UPCOMING PREDICTIONS
+st.subheader("Upcoming Predictions")
+upcoming = get_upcoming_predictions()
+render_prediction_cards(upcoming)
 
-if predictions:
-    html_cards = "<div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;'>"
-    
-    for p in predictions:
-        home, away = p['home_team'], p['away_team']
-        pred_h, pred_a = p['predicted_home_score'], p['predicted_away_score']
-        real_h = p['real_home_score']
-        real_a = p['real_away_score']
-        pts = p['points_awarded']
-        
-        h_flag = TEAM_FLAGS.get(home, "⚽")
-        a_flag = TEAM_FLAGS.get(away, "⚽")
+st.markdown("---")
 
-        # Visual pill for the actual result
-        if pts == 3:
-            pill = f"<span style='background-color:rgba(34,197,94,0.15); color:#22c55e; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>✓✓ EXACT ({real_h}-{real_a})</span>"
-        elif pts == 1:
-            pill = f"<span style='background-color:rgba(234,179,8,0.15); color:#eab308; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>✓ WINNER ({real_h}-{real_a})</span>"
-        elif pts == 0:
-            pill = f"<span style='background-color:rgba(239,68,68,0.15); color:#ef4444; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>✗ WRONG ({real_h}-{real_a})</span>"
-        else:
-            pill = "<span style='background-color:#3c4043; color:#9aa0a6; padding:3px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold;'>PENDING</span>"
-
-        card = f"""<div style="background-color: #202124; border: 1px solid #3c4043; border-radius: 8px; padding: 16px; font-family: Roboto, Arial, sans-serif;">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-        <span style="color: #9aa0a6; font-size: 0.75rem; text-transform: uppercase;">Engine Prediction</span>
-        {pill}
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 1.2rem;">{h_flag}</span>
-            <span style="color: #e8eaed; font-size: 1rem;">{home}</span>
-        </div>
-        <span style="color: #8ab4f8; font-size: 1.2rem; font-weight: bold;">{pred_h}</span>
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 1.2rem;">{a_flag}</span>
-            <span style="color: #e8eaed; font-size: 1rem;">{away}</span>
-        </div>
-        <span style="color: #8ab4f8; font-size: 1.2rem; font-weight: bold;">{pred_a}</span>
-    </div>
-</div>"""
-        html_cards += card
-        
-    html_cards += "</div>"
-    st.markdown(html_cards, unsafe_allow_html=True)
-else:
-    st.info("No predictions scored yet.")
+# 5. COMPLETED PREDICTIONS
+st.subheader("Historical & Completed Predictions")
+completed = get_completed_predictions()
+render_prediction_cards(completed)
