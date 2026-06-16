@@ -282,7 +282,7 @@ def run_pipeline(fixture_id=None):
     return {"fixture_id": fid, "home_team": home_team, "away_team": away_team, "prediction": final_pred, "poisson_meta": meta, "model_name": model_tag}
 
 
-def run_all_upcoming(limit=5):
+def run_all_upcoming(limit=4):
     results = []
     for f in get_upcoming_fixtures(limit):
         result = run_pipeline(fixture_id=f["id"])
@@ -297,7 +297,7 @@ if __name__ == "__main__":
     init_db()
     fetch_and_store_fixtures()
     print("\n" + "─" * 50)
-    results = run_all_upcoming(limit=5)
+    results = run_all_upcoming(limit=4)
     print("\n" + "─" * 50)
     print("PREDICTIONS")
     for r in results:

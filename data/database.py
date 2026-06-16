@@ -126,7 +126,7 @@ def upsert_player(player_name: str, team_name: str, rating: float, goals: int, x
         conn.close()
 
 
-def get_upcoming_predictions(limit: int = 20) -> list[dict]:
+def get_upcoming_predictions(limit: int = 4) -> list[dict]:
     """Fetch predictions where the match hasn't happened yet (points_awarded IS NULL)."""
     conn = get_connection()
     try:
