@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WC 2026 Prediction Engine</title>
+<style>
+:root {
+  --bg:#0a0c10; --surface:#111318; --border:#1e2130;
+  --text:#e8eaf0; --muted:#6b7280;
+  --green:#22c55e; --yellow:#eab308; --red:#ef4444;
+  --accent:#6366f1;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;
+      padding:28px 24px;max-width:900px;margin:auto}
+h1{font-size:1.5rem;font-weight:700;color:#fff}
+.sub{font-size:.8rem;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:.7rem;background:var(--accent);color:#fff;
+      padding:3px 10px;border-radius:999px;vertical-align:middle;margin-left:10px}
+h2{font-size:.78rem;font-weight:600;color:var(--muted);margin:28px 0 12px;
+    text-transform:uppercase;letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:20px 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.card .v{font-size:1.9rem;font-weight:700;color:var(--accent)}
+.card .l{font-size:.72rem;color:var(--muted);margin-top:4px}
+table{width:100%;border-collapse:collapse;background:var(--surface);
+       border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+th{text-align:left;padding:10px 14px;font-size:.7rem;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:.85rem}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.rank{color:var(--muted);width:36px}
+.model{font-weight:600}
+.pts{color:var(--accent);font-weight:700;font-size:1rem}
+.bar{background:var(--border);border-radius:999px;height:7px;width:90px}
+.fill{background:var(--accent);height:7px;border-radius:999px}
+.b{font-size:.7rem;padding:3px 8px;border-radius:999px;font-weight:600}
+.b-exact{background:rgba(34,197,94,.15);color:var(--green)}
+.b-ok{background:rgba(234,179,8,.15);color:var(--yellow)}
+.b-fail{background:rgba(239,68,68,.15);color:var(--red)}
+.b-pending{background:var(--border);color:var(--muted)}
+.empty{text-align:center;color:var(--muted);padding:24px}
+@media(max-width:560px){.bar{display:none}}
+</style>
+</head>
+<body>
+<h1>⚽ WC 2026 Prediction Engine <span class="tag">LIVE</span></h1>
+<p class="sub">Last updated: 2026-06-16 10:25:18 &nbsp;·&nbsp; 5 predictions awaiting evaluation</p>
+
+<div class="cards">
+  <div class="card"><div class="v">0</div><div class="l">Scored</div></div>
+  <div class="card"><div class="v">0</div><div class="l">Exact Scores</div></div>
+  <div class="card"><div class="v">0.0%</div><div class="l">Exact Rate</div></div>
+  <div class="card"><div class="v">0.0%</div><div class="l">Correct Outcomes</div></div>
+</div>
+
+<h2>Leaderboard</h2>
+<table>
+  <tr><th>#</th><th>Model</th><th>Points</th><th>Exact</th><th>Accuracy</th><th>Score</th></tr>
+  <tr><td colspan="6" class="empty">No predictions scored yet</td></tr>
+</table>
+
+<h2>Recent Predictions</h2>
+<table>
+  <tr><th>Match</th><th>Predicted</th><th>Actual</th><th>Result</th></tr>
+  <tr>
+          <td>Portugal vs DR Congo</td>
+          <td>2-0</td>
+          <td>TBD</td>
+          <td><span class="b b-pending">–</span></td>
+        </tr><tr>
+          <td>Iraq vs Norway</td>
+          <td>1-1</td>
+          <td>TBD</td>
+          <td><span class="b b-pending">–</span></td>
+        </tr><tr>
+          <td>France vs Senegal</td>
+          <td>1-1</td>
+          <td>TBD</td>
+          <td><span class="b b-pending">–</span></td>
+        </tr><tr>
+          <td>Austria vs Jordan</td>
+          <td>1-1</td>
+          <td>TBD</td>
+          <td><span class="b b-pending">–</span></td>
+        </tr><tr>
+          <td>Argentina vs Algeria</td>
+          <td>2-0</td>
+          <td>TBD</td>
+          <td><span class="b b-pending">–</span></td>
+        </tr>
+</table>
+</body>
+</html>

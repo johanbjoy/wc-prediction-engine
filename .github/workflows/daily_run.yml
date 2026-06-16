@@ -1,0 +1,23 @@
+name: Daily World Cup Engine Run
+on:
+  schedule:
+    - cron: '0 8 * * *' # Runs every day at 8:00 AM UTC
+  workflow_dispatch: # Allows you to run it manually from GitHub
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run Orchestrator
+        env:
+          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          FOOTBALL_API_KEY: ${{ secrets.FOOTBALL_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: python3 orchestrator.py
