@@ -149,6 +149,24 @@ def get_recent_predictions(limit: int = 15) -> list[dict]:
         conn.close()
 
 
+def get_all_fixtures(limit: int = 20) -> list[dict]:
+    """Fetch recent and upcoming fixtures with live scores."""
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    home_team, away_team, match_date,
+                    real_home_score, real_away_score, status
+                FROM fixtures
+                ORDER BY match_date DESC
+                LIMIT %s
+            """, (limit,))
+            rows = cur.fetchall()
+            return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
 def get_leaderboard() -> list[dict]:
     conn = get_connection()
     try:
