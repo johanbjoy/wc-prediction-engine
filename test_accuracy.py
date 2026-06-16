@@ -100,7 +100,15 @@ def main():
             "actual_outcome": _outcome(real_h, real_a),
         })
 
+        from orchestrator import _save_prediction
+        from evaluator import evaluate_fixture
+        _save_prediction(f["id"], "ensemble+gemini+deepseek-r1", pred_h, pred_a)
+        evaluate_fixture(f["id"])
+
         print(f"  {match_label:<35} {pred_str:>6} {actual_str:>8} {pts:>4}  {verdict}")
+
+    from evaluator import rebuild_leaderboard
+    rebuild_leaderboard()
 
     n = len(completed)
     scored = exact_count + correct_count + wrong_count
