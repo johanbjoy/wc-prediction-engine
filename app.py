@@ -15,6 +15,13 @@ def render_prediction_cards(predictions):
         real_a = p['real_away_score']
         pts = p['points_awarded']
         
+        # Format match date string
+        raw_date = p.get('match_date', '')
+        if hasattr(raw_date, 'strftime'):
+            date_str = raw_date.strftime('%b %d, %Y - %H:%M')
+        else:
+            date_str = str(raw_date)[:16] if raw_date else "TBD"
+        
         h_flag = TEAM_FLAGS.get(home, "⚽")
         a_flag = TEAM_FLAGS.get(away, "⚽")
 
@@ -30,7 +37,7 @@ def render_prediction_cards(predictions):
 
         card = f"""<div style="background-color: #202124; border: 1px solid #3c4043; border-radius: 8px; padding: 16px; font-family: Roboto, Arial, sans-serif;">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-        <span style="color: #9aa0a6; font-size: 0.75rem; text-transform: uppercase;">Engine Prediction</span>
+        <span style="color: #9aa0a6; font-size: 0.75rem; text-transform: uppercase;">{date_str}</span>
         {pill}
     </div>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -77,9 +84,21 @@ TEAM_FLAGS = {
 
 
 
+# 1. COMPLETED PREDICTIONS
+st.subheader("Historical & Completed Predictions")
+completed = get_completed_predictions()
+render_prediction_cards(completed)
+
 st.markdown("---")
 
-# 2. SUMMARY METRICS
+# 2. UPCOMING PREDICTIONS
+st.subheader("Upcoming Predictions")
+upcoming = get_upcoming_predictions()
+render_prediction_cards(upcoming)
+
+st.markdown("---")
+
+# 3. SUMMARY METRICS
 st.subheader("Engine Accuracy Metrics")
 stats = get_summary()
 
@@ -95,7 +114,7 @@ with col4:
 
 st.markdown("---")
 
-# 3. LEADERBOARD
+# 4. LEADERBOARD
 st.subheader("Model Leaderboard")
 leaderboard = get_leaderboard()
 
@@ -113,17 +132,3 @@ if leaderboard:
     st.dataframe(df_lb, use_container_width=True, hide_index=True)
 else:
     st.info("No models scored yet.")
-
-st.markdown("---")
-
-# 4. UPCOMING PREDICTIONS
-st.subheader("Upcoming Predictions")
-upcoming = get_upcoming_predictions()
-render_prediction_cards(upcoming)
-
-st.markdown("---")
-
-# 5. COMPLETED PREDICTIONS
-st.subheader("Historical & Completed Predictions")
-completed = get_completed_predictions()
-render_prediction_cards(completed)
