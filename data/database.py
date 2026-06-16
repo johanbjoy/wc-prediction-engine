@@ -126,6 +126,29 @@ def upsert_player(player_name: str, team_name: str, rating: float, goals: int, x
         conn.close()
 
 
+def get_recent_predictions(limit: int = 15) -> list[dict]:
+    """Fetch the most recent predictions from the database."""
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    f.home_team, f.away_team, f.match_date,
+                    f.real_home_score, f.real_away_score,
+                    p.model_name,
+                    p.predicted_home_score, p.predicted_away_score,
+                    p.points_awarded
+                FROM predictions p
+                JOIN fixtures f ON f.id = p.fixture_id
+                ORDER BY f.match_date DESC, p.created_at DESC
+                LIMIT %s
+            """, (limit,))
+            rows = cur.fetchall()
+            return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     init_db()
