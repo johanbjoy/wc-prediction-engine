@@ -406,53 +406,50 @@ def _build_card(p: dict) -> str:
     # Build probability section (only if data available)
     prob_html = ""
     if p_home > 0 or p_draw > 0 or p_away > 0:
-        prob_html = f"""
-        <div class="prob-container">
-            <div class="prob-labels">
-                <span class="prob-label prob-home">{home[:3].upper()} {p_home}%</span>
-                <span class="prob-label prob-draw">DRAW {p_draw}%</span>
-                <span class="prob-label prob-away">{away[:3].upper()} {p_away}%</span>
-            </div>
-            <div class="prob-bar">
-                <div class="prob-seg-home" style="width:{p_home}%"></div>
-                <div class="prob-seg-draw" style="width:{p_draw}%"></div>
-                <div class="prob-seg-away" style="width:{p_away}%"></div>
-            </div>
-        </div>"""
+        prob_html = f"""<div class="prob-container">
+    <div class="prob-labels">
+        <span class="prob-label prob-home">{home[:3].upper()} {p_home}%</span>
+        <span class="prob-label prob-draw">DRAW {p_draw}%</span>
+        <span class="prob-label prob-away">{away[:3].upper()} {p_away}%</span>
+    </div>
+    <div class="prob-bar">
+        <div class="prob-seg-home" style="width:{p_home}%"></div>
+        <div class="prob-seg-draw" style="width:{p_draw}%"></div>
+        <div class="prob-seg-away" style="width:{p_away}%"></div>
+    </div>
+</div>"""
 
     # xG badges
     xg_html = ""
     if xg_home > 0 or xg_away > 0:
-        xg_html = f"""
-        <div class="xg-row">
-            <span class="xg-badge">xG {home[:3].upper()}: <span class="xg-val">{xg_home:.2f}</span></span>
-            <span class="xg-badge">xG {away[:3].upper()}: <span class="xg-val">{xg_away:.2f}</span></span>
-        </div>"""
+        xg_html = f"""<div class="xg-row">
+    <span class="xg-badge">xG {home[:3].upper()}: <span class="xg-val">{xg_home:.2f}</span></span>
+    <span class="xg-badge">xG {away[:3].upper()}: <span class="xg-val">{xg_away:.2f}</span></span>
+</div>"""
 
-    return f"""
-    <div class="pred-card">
-        <div class="card-header">
-            <span class="card-date">{date_str}</span>
-            {badge}
+    return f"""<div class="pred-card">
+    <div class="card-header">
+        <span class="card-date">{date_str}</span>
+        {badge}
+    </div>
+    <div class="team-row">
+        <div class="team-info">
+            <span class="team-flag">{h_flag}</span>
+            <span class="team-name">{home}</span>
         </div>
-        <div class="team-row">
-            <div class="team-info">
-                <span class="team-flag">{h_flag}</span>
-                <span class="team-name">{home}</span>
-            </div>
-            <span class="team-score">{pred_h}</span>
+        <span class="team-score">{pred_h}</span>
+    </div>
+    <div class="vs-divider">VS</div>
+    <div class="team-row">
+        <div class="team-info">
+            <span class="team-flag">{a_flag}</span>
+            <span class="team-name">{away}</span>
         </div>
-        <div class="vs-divider">VS</div>
-        <div class="team-row">
-            <div class="team-info">
-                <span class="team-flag">{a_flag}</span>
-                <span class="team-name">{away}</span>
-            </div>
-            <span class="team-score">{pred_a}</span>
-        </div>
-        {prob_html}
-        {xg_html}
-    </div>"""
+        <span class="team-score">{pred_a}</span>
+    </div>
+    {prob_html}
+    {xg_html}
+</div>"""
 
 
 def render_prediction_cards(predictions):
