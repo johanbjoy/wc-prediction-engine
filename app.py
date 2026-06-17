@@ -515,29 +515,7 @@ with col3:
 with col4:
     st.metric(label="Outcome Accuracy", value=f"{stats['acc_pct']}%")
 
-st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
-
-# ─── SECTION 4: MODEL LEADERBOARD ──────────────────────────────────────────
-st.markdown('<div class="section-header">🏅 Model Leaderboard</div>', unsafe_allow_html=True)
-leaderboard = get_leaderboard()
-
-if leaderboard:
-    formatted_lb = []
-    for rank, l in enumerate(leaderboard, 1):
-        scored = l.get('scored_preds') or 1
-        correct = l.get('correct_outcomes') or 0
-        formatted_lb.append({
-            "Rank": f"#{rank}",
-            "Model": l['model_name'],
-            "Points": l['total_points'] or 0,
-            "Exact Scores": l['exact_scores_count'] or 0,
-            "Accuracy": f"{round(correct / scored * 100, 1)}%"
-        })
-    df_lb = pd.DataFrame(formatted_lb)
-    st.dataframe(df_lb, use_container_width=True, hide_index=True)
-else:
-    st.info("No models scored yet.")
 
 # ─── FOOTER / WATERMARK ────────────────────────────────────────────────────
 st.markdown("""
