@@ -142,6 +142,7 @@ def get_upcoming_predictions(limit: int = 4) -> list[dict]:
                 FROM predictions p
                 JOIN fixtures f ON f.id = p.fixture_id
                 WHERE p.points_awarded IS NULL
+                AND p.model_name NOT IN ('xgboost', 'poisson')
                 AND SUBSTRING(f.match_date, 1, 10) = (
                     SELECT SUBSTRING(match_date, 1, 10) FROM fixtures WHERE status IN ('NS','TBD','POSTP') ORDER BY match_date ASC LIMIT 1
                 )
@@ -167,6 +168,7 @@ def get_completed_predictions(limit: int = 20) -> list[dict]:
                 FROM predictions p
                 JOIN fixtures f ON f.id = p.fixture_id
                 WHERE p.points_awarded IS NOT NULL
+                AND p.model_name NOT IN ('xgboost', 'poisson')
                 ORDER BY f.match_date DESC, p.created_at DESC
                 LIMIT %s
             """, (limit,))
@@ -220,16 +222,18 @@ def get_summary() -> dict:
     conn = get_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT COUNT(*) FROM predictions WHERE points_awarded IS NOT NULL")
+            _filter = "AND model_name NOT IN ('xgboost', 'poisson')"
+
+            cur.execute(f"SELECT COUNT(*) FROM predictions WHERE points_awarded IS NOT NULL {_filter}")
             total = cur.fetchone()["count"]
 
-            cur.execute("SELECT COUNT(*) FROM predictions WHERE points_awarded = 3")
+            cur.execute(f"SELECT COUNT(*) FROM predictions WHERE points_awarded = 3 {_filter}")
             exact = cur.fetchone()["count"]
 
-            cur.execute("SELECT COUNT(*) FROM predictions WHERE points_awarded > 0")
+            cur.execute(f"SELECT COUNT(*) FROM predictions WHERE points_awarded > 0 {_filter}")
             correct = cur.fetchone()["count"]
 
-            cur.execute("SELECT COUNT(*) FROM predictions WHERE points_awarded IS NULL")
+            cur.execute(f"SELECT COUNT(*) FROM predictions WHERE points_awarded IS NULL {_filter}")
             pending = cur.fetchone()["count"]
 
         return {

@@ -41,6 +41,60 @@ logger = logging.getLogger(__name__)
 
 AGENT2_BACKEND = os.getenv("AGENT2_BACKEND", "poisson")
 
+def get_dynamic_weights() -> dict:
+    # Set default weights to fall back on if criteria are not met
+    weights = {"xgboost": 1.0, "poisson": 0.0}
+    
+    # Establish a connection to the PostgreSQL database
+    conn = get_connection()
+    
+    try:
+        # Create a cursor to execute the query
+        with conn.cursor() as cur:
+            # Query the database for average points per model component (xgboost vs poisson)
+            cur.execute("""
+                SELECT
+                    CASE
+                        WHEN model_name LIKE '%%xgboost%%' THEN 'xgboost'
+                        WHEN model_name LIKE '%%poisson%%' THEN 'poisson'
+                    END AS model_type,
+                    COUNT(points_awarded) AS match_count,
+                    AVG(points_awarded) AS avg_points
+                FROM predictions
+                WHERE points_awarded IS NOT NULL
+                  AND (model_name LIKE '%%xgboost%%' OR model_name LIKE '%%poisson%%')
+                GROUP BY model_type
+            """)
+            
+            # Fetch all the aggregated results from the query
+            rows = cur.fetchall()
+            
+            # Create a dictionary keyed by the clean model_type alias
+            stats = {row["model_type"]: {"count": row["match_count"], "avg": float(row["avg_points"])} for row in rows}
+            
+            # Check if both models have at least 5 graded matches to safely proceed with dynamic weighting
+            if stats.get("xgboost", {}).get("count", 0) >= 5 and stats.get("poisson", {}).get("count", 0) >= 5:
+                
+                # Extract the calculated average points for both models
+                xgb_avg = stats["xgboost"]["avg"]
+                poi_avg = stats["poisson"]["avg"]
+                
+                # Calculate the combined average sum to use for mathematical normalization
+                total_avg = xgb_avg + poi_avg
+                
+                # Prevent division by zero in the rare event both models average exactly 0 points
+                if total_avg > 0:
+                    
+                    # Normalize the weights so they dynamically sum to exactly 1.0
+                    weights["xgboost"] = round(xgb_avg / total_avg, 3)
+                    weights["poisson"] = round(poi_avg / total_avg, 3)
+    finally:
+        # Ensure the database connection is securely closed regardless of success or failure
+        conn.close()
+        
+    # Return the final dynamically calculated or default fallback weights
+    return weights
+
 def _cache_get(key: str) -> str | None:
     """Retrieve Agent 1's tactical summary from database cache."""
     conn = get_connection()
@@ -133,9 +187,8 @@ def run_pipeline(fixture_id=None):
     away_players = get_starting_xi(away_team, fid, match_date)
     logger.info(f"  Players: {len(home_players)} {home_team} | {len(away_players)} {away_team}")
 
+
     # --- ENSEMBLE EXECUTION ---
-    POISSON_WEIGHT = 0.70
-    XGB_WEIGHT = 0.30
 
     try:
         poisson_result = run_poisson(home_team, away_team, home_players, away_players)
@@ -172,9 +225,12 @@ def run_pipeline(fixture_id=None):
         x_xg_home = xgb_result["model_meta"]["raw_home_xg"]
         x_xg_away = xgb_result["model_meta"]["raw_away_xg"]
 
-    # Shifted to 100% XGBoost per optimization for >50% accuracy target
-    POISSON_WEIGHT = 0.0
-    XGB_WEIGHT = 1.0
+    # Shifted to dynamic weighting based on actual model performance
+    weights = get_dynamic_weights()
+    XGB_WEIGHT = weights["xgboost"]
+    POISSON_WEIGHT = weights["poisson"]
+    
+    logger.info(f"  Dynamic Weights Appied: XGBoost ({XGB_WEIGHT}) | Poisson ({POISSON_WEIGHT})")
 
     blended_home_xg = (p_xg_home * POISSON_WEIGHT) + (x_xg_home * XGB_WEIGHT)
     blended_away_xg = (p_xg_away * POISSON_WEIGHT) + (x_xg_away * XGB_WEIGHT)
@@ -279,6 +335,19 @@ def run_pipeline(fixture_id=None):
     import json
     _save_prediction(fid, model_tag, final_pred["home_score"], final_pred["away_score"], json.dumps(meta))
     logger.info(f"  ✓ Saved: {home_team} {final_pred['home_score']}-{final_pred['away_score']} {away_team} [{model_tag}]")
+
+    # Save individual model predictions for dynamic weight grading
+    if xgb_result:
+        xgb_h = max(0, int(round(x_xg_home)))
+        xgb_a = max(0, int(round(x_xg_away)))
+        _save_prediction(fid, "xgboost", xgb_h, xgb_a)
+        logger.info(f"  ✓ Saved individual: {home_team} {xgb_h}-{xgb_a} {away_team} [xgboost]")
+
+    if poisson_result:
+        poi_h = max(0, int(round(p_xg_home)))
+        poi_a = max(0, int(round(p_xg_away)))
+        _save_prediction(fid, "poisson", poi_h, poi_a)
+        logger.info(f"  ✓ Saved individual: {home_team} {poi_h}-{poi_a} {away_team} [poisson]")
 
     return {"fixture_id": fid, "home_team": home_team, "away_team": away_team, "prediction": final_pred, "poisson_meta": meta, "model_name": model_tag}
 
