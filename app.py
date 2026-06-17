@@ -511,9 +511,9 @@ with col1:
 with col2:
     st.metric(label="Exact Scores", value=stats["exact"])
 with col3:
-    st.metric(label="Correct Winner", value=stats["correct"] - stats["exact"])
+    st.metric(label="Correct Outcome", value=stats["correct"] - stats["exact"])
 with col4:
-    st.metric(label="Wrong", value=stats["wrong"])
+    st.metric(label="Wrong Calls", value=stats["wrong"])
 with col5:
     st.metric(label="Accuracy", value=f"{stats['acc_pct']}%")
 
