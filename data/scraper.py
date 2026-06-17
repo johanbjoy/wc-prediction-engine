@@ -407,7 +407,7 @@ def _fetch_player_stats(team_name: str) -> list[dict] | None:
     if not team_data or not team_data.get("response"):
         return None
     team_id = team_data["response"][0]["team"]["id"]
-    stats_data = _api_get("players", {"team": team_id, "season": 2024, "page": 1})
+    stats_data = _api_get("players", {"team": team_id, "season": 2026, "page": 1})
     if not stats_data or not stats_data.get("response"):
         return None
     players = []

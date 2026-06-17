@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")
 GROK_KEY = os.getenv("GROK_API_KEY", "")
 GEMINI_MODEL = "gemini-1.5-flash-latest"
-GROK_MODEL = "grok-beta"
+GROK_MODEL = "grok-2-latest"
 
 def _validated_mods(mods: dict, fallback: dict) -> dict:
     valid = {}

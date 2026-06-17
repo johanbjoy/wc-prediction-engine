@@ -138,7 +138,7 @@ def _compute_lambdas(
 
 # ─── PROBABILITY MATRIX ────────────────────────────────────────────────────
 
-def _simulate_match(lam_h: float, lam_a: float, num_simulations: int = 10000, llm_modifiers: dict = None) -> dict:
+def _simulate_match(lam_h: float, lam_a: float, num_simulations: int = 10000, llm_modifiers: dict = None, is_knockout: bool = False) -> dict:
     if llm_modifiers:
         lam_h *= llm_modifiers.get("home_attack_mod", 1.0) * llm_modifiers.get("away_defense_mod", 1.0)
         lam_a *= llm_modifiers.get("away_attack_mod", 1.0) * llm_modifiers.get("home_defense_mod", 1.0)
@@ -166,8 +166,25 @@ def _simulate_match(lam_h: float, lam_a: float, num_simulations: int = 10000, ll
                 score_h += 1
             if random.random() < prob_a:
                 score_a += 1
+
+        # Knockout Logic: Extra Time & Penalties
+        advancing_team = None
+        if is_knockout and score_h == score_a:
+            # 30 mins Extra Time
+            for _ in range(30):
+                if random.random() < base_prob_h_min: score_h += 1
+                if random.random() < base_prob_a_min: score_a += 1
                 
+            if score_h == score_a:
+                # Penalty Shootout: 50/50 coin flip tiebreaker for winner
+                advancing_team = "home" if random.random() > 0.5 else "away"
+
         score_str = f"{score_h}-{score_a}"
+        if advancing_team == "home":
+            score_str += " (p:H)"
+        elif advancing_team == "away":
+            score_str += " (p:A)"
+            
         outcomes[score_str] = outcomes.get(score_str, 0) + 1
         
     # Convert counts to probabilities
@@ -185,13 +202,14 @@ def _simulate_match(lam_h: float, lam_a: float, num_simulations: int = 10000, ll
     p_home_win = p_draw = p_away_win = 0.0
     
     for k, v in matrix.items():
-        h, a = map(int, k.split("-"))
+        base_score = k.split(" (")[0]
+        h, a = map(int, base_score.split("-"))
         if v > best_prob:
             best_prob = v
             best_score = (h, a)
             
-        if h > a: p_home_win += v
-        elif h == a: p_draw += v
+        if h > a or "(p:H)" in k: p_home_win += v
+        elif h == a and "(p:" not in k: p_draw += v
         else: p_away_win += v
         
         matrix[k] = round(v * 100, 4)
@@ -220,7 +238,8 @@ def _top_n(matrix: dict[str, float], n: int) -> list[dict]:
 def predict(
     home_team: str, away_team: str,
     home_players: list[dict], away_players: list[dict],
-    llm_modifiers: dict = None
+    llm_modifiers: dict = None,
+    is_knockout: bool = False
 ) -> dict:
     """
     Public interface matching orchestrator's JSON contract.
@@ -234,7 +253,7 @@ def predict(
       }
     """
     lam_h, lam_a = _compute_lambdas(home_team, away_team, home_players, away_players)
-    result = _simulate_match(lam_h, lam_a, num_simulations=10000, llm_modifiers=llm_modifiers)
+    result = _simulate_match(lam_h, lam_a, num_simulations=10000, llm_modifiers=llm_modifiers, is_knockout=is_knockout)
     h, a   = result["predicted_home_score"], result["predicted_away_score"]
     winner = home_team if h > a else (away_team if a > h else "Draw")
 

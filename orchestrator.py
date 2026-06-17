@@ -188,10 +188,16 @@ def run_pipeline(fixture_id=None):
     logger.info(f"  Players: {len(home_players)} {home_team} | {len(away_players)} {away_team}")
 
 
+    # Determine if match is in the knockout stage (Extra Time / Penalties enabled)
+    # The group stage ends June 27. Knockouts begin June 28.
+    is_knockout = False
+    if match_date and match_date[:10] >= "2026-06-28":
+        is_knockout = True
+
     # --- ENSEMBLE EXECUTION ---
 
     try:
-        poisson_result = run_poisson(home_team, away_team, home_players, away_players)
+        poisson_result = run_poisson(home_team, away_team, home_players, away_players, is_knockout=is_knockout)
     except Exception as e:
         logger.error(f"Poisson model failed: {e}")
         poisson_result = None
