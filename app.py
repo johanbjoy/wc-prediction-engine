@@ -403,30 +403,6 @@ def _build_card(p: dict) -> str:
     xg_home = blended.get('home', 0)
     xg_away = blended.get('away', 0)
 
-    # Build probability section (only if data available)
-    prob_html = ""
-    if p_home > 0 or p_draw > 0 or p_away > 0:
-        prob_html = f"""<div class="prob-container">
-    <div class="prob-labels">
-        <span class="prob-label prob-home">{home[:3].upper()} {p_home}%</span>
-        <span class="prob-label prob-draw">DRAW {p_draw}%</span>
-        <span class="prob-label prob-away">{away[:3].upper()} {p_away}%</span>
-    </div>
-    <div class="prob-bar">
-        <div class="prob-seg-home" style="width:{p_home}%"></div>
-        <div class="prob-seg-draw" style="width:{p_draw}%"></div>
-        <div class="prob-seg-away" style="width:{p_away}%"></div>
-    </div>
-</div>"""
-
-    # xG badges
-    xg_html = ""
-    if xg_home > 0 or xg_away > 0:
-        xg_html = f"""<div class="xg-row">
-    <span class="xg-badge">xG {home[:3].upper()}: <span class="xg-val">{xg_home:.2f}</span></span>
-    <span class="xg-badge">xG {away[:3].upper()}: <span class="xg-val">{xg_away:.2f}</span></span>
-</div>"""
-
     return f"""<div class="pred-card">
     <div class="card-header">
         <span class="card-date">{date_str}</span>
@@ -447,8 +423,6 @@ def _build_card(p: dict) -> str:
         </div>
         <span class="team-score">{pred_a}</span>
     </div>
-    {prob_html}
-    {xg_html}
 </div>"""
 
 
