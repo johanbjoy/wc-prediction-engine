@@ -505,15 +505,17 @@ st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 st.markdown('<div class="section-header">🎯 Engine Accuracy Metrics</div>', unsafe_allow_html=True)
 stats = get_summary()
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.metric(label="Total Scored", value=stats["total"])
 with col2:
     st.metric(label="Exact Scores", value=stats["exact"])
 with col3:
-    st.metric(label="Exact Score %", value=f"{stats['exact_pct']}%")
+    st.metric(label="Correct Winner", value=stats["correct"] - stats["exact"])
 with col4:
-    st.metric(label="Outcome Accuracy", value=f"{stats['acc_pct']}%")
+    st.metric(label="Wrong", value=stats["wrong"])
+with col5:
+    st.metric(label="Accuracy", value=f"{stats['acc_pct']}%")
 
 
 

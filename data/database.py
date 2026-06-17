@@ -236,6 +236,7 @@ def get_summary() -> dict:
             "total":    total,
             "exact":    exact,
             "correct":  correct,
+            "wrong":    total - correct,
             "pending":  pending,
             "acc_pct":  round(correct / total * 100, 1) if total else 0.0,
             "exact_pct": round(exact / total * 100, 1) if total else 0.0,
