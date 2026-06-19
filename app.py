@@ -455,8 +455,8 @@ def render_prediction_cards(predictions):
 st.markdown("""
 <div class="hero">
     <span class="hero-icon">&#9917;</span>
-    <div class="hero-title">World Cup 2026 Prediction Engine</div>
-    <div class="hero-sub">Powered by <span>XGBoost</span> &middot; Poisson Simulation &middot; Live Tournament Form</div>
+    <div class="hero-title">N.E.X.U.S. V2 Engine</div>
+    <div class="hero-sub">Powered by <span>CatBoost</span> &middot; Dixon-Coles Poisson &middot; Live Tournament Form</div>
     <div class="hero-badge"><span class="live-dot"></span>AUTONOMOUS &middot; 30-MINUTE UPDATES</div>
 </div>
 <div class="divider"></div>
