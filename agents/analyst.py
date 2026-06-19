@@ -11,7 +11,11 @@ def _fmt_squad(team: str, players: list[dict]) -> str:
     lines = [f"  {p['player_name']} [{p.get('position','?')}] rating={p['rating']:.1f} goals={p['goals']} xG={p['xG']:.2f} form={p['form_metric']:.1f}" for p in players[:11]]
     return f"{team}:\n" + "\n".join(lines)
 
-def build_tactical_prompt(home_team, away_team, home_players, away_players):
+def build_tactical_prompt(home_team, away_team, home_players, away_players, home_sentiment=None, away_sentiment=None):
+    sentiment_section = ""
+    if home_sentiment or away_sentiment:
+        sentiment_section = f"\nPUBLIC SENTIMENT & NEWS:\n{home_team} Headlines: {home_sentiment or 'None'}\n{away_team} Headlines: {away_sentiment or 'None'}\n"
+
     return f"""You are a World Cup tactical analyst. Write a concise tactical preview (max 180 words).
 
 MATCH: {home_team} vs {away_team}
@@ -20,8 +24,8 @@ SQUAD DATA:
 {_fmt_squad(home_team, home_players)}
 
 {_fmt_squad(away_team, away_players)}
-
-Cover: key player matchups, attacking vs defensive strengths, predicted tempo.
+{sentiment_section}
+Cover: key player matchups, attacking vs defensive strengths, public morale/pressure based on headlines, predicted tempo.
 No score prediction. Pure tactical analysis."""
 
 def call_llm(prompt: str) -> str | None:

@@ -7,12 +7,34 @@ Data sources (priority order):
   3. API-Football              (if API_FOOTBALL_KEY set)
   4. Baseline fallback         (always works, zero API cost)
 """
-import os, json, logging, requests, hashlib
+import os
+import json
+import logging
+import requests
+import datetime
+import xml.etree.ElementTree as ET
+from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from data.database import get_connection
 
+load_dotenv()
+
 logger = logging.getLogger(__name__)
+
 API_KEY  = os.getenv("API_FOOTBALL_KEY", "")
+
+def get_team_sentiment(team: str) -> list[str]:
+    """Fetch recent news headlines from Google News RSS for sentiment context."""
+    url = f"https://news.google.com/rss/search?q={team}+national+football+team&hl=en-US&gl=US&ceid=US:en"
+    try:
+        r = requests.get(url, timeout=5)
+        root = ET.fromstring(r.text)
+        headlines = [item.find('title').text for item in root.findall('.//item')[:3]]
+        return headlines
+    except Exception as e:
+        logger.warning(f"Sentiment scrape failed for {team}: {e}")
+        return []
+
 BASE_URL = "https://v3.football.api-sports.io"
 HEADERS  = {"x-apisports-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io"}
 
@@ -459,6 +481,32 @@ def fetch_actual_result(fixture_id: int) -> dict | None:
             goals = f.get("goals", {})
             return {"home_score": goals.get("home", 0), "away_score": goals.get("away", 0), "status": status}
     return None
+
+
+# ─── ELITE CONTEXT FEATURES (PHASE 2) ───────────────────────────────────────
+
+def get_h2h_streak(home_team: str, away_team: str) -> int:
+    """
+    Returns the net win streak for the home team against the away team.
+    e.g. +2 means home team won last 2 encounters. -1 means away team won last encounter.
+    Fallback to 0 if no API.
+    """
+    if not API_KEY:
+        return 0
+    # Placeholder: In a real system we'd call API-Football /fixtures/headtohead
+    # and parse the last 5 matches. For now, we return 0.
+    return 0
+
+def has_coach_changed_tactics(team_name: str) -> int:
+    """
+    Returns 1 if the coach has changed formation (e.g. 4-3-3 -> 3-5-2)
+    in the last 3 games. 0 otherwise.
+    """
+    if not API_KEY:
+        return 0
+    # Placeholder: Call API-Football /fixtures/lineups for last 3 matches
+    # and compare the "formation" field.
+    return 0
 
 
 # ─── ENTRY POINT ───────────────────────────────────────────────────────────

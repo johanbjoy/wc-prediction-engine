@@ -244,7 +244,11 @@ def run_pipeline(fixture_id=None):
     if not tactical_preview:
         logger.info("  Agent 1: requesting tactical preview from Groq LLaMA 3.3…")
         from agents.analyst import call_llm, build_tactical_prompt
-        tactical_preview = call_llm(build_tactical_prompt(home_team, away_team, home_players, away_players))
+        from data.scraper import get_team_sentiment
+        logger.info("  Fetching sentiment headlines...")
+        home_sentiment = get_team_sentiment(home_team)
+        away_sentiment = get_team_sentiment(away_team)
+        tactical_preview = call_llm(build_tactical_prompt(home_team, away_team, home_players, away_players, home_sentiment, away_sentiment))
         if tactical_preview:
             _cache_set(cache_key, tactical_preview)
             logger.info("  Agent 1: preview received and cached.")
