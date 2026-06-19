@@ -456,6 +456,9 @@ def load_worldcup_data():
         })
         
     df = pd.DataFrame(all_rows)
+    if len(df) > 0:
+        df['match_date'] = pd.to_datetime(df['match_date'], utc=True).dt.tz_convert('Asia/Kolkata')
+    
     # Ensure there's data even if DB is empty
     if len(df) == 0:
         return pd.DataFrame(columns=[
@@ -562,8 +565,8 @@ with tab1:
                        'actual_score', 'pred_h_score', 'pred_a_score', 'model_accuracy']
         
         history_df_display = historical_df[history_cols].copy()
-        # Format date WITH TIME
-        history_df_display['match_date'] = history_df_display['match_date'].dt.strftime('%B %d, %Y at %H:%M UTC')
+        # Format date WITH TIME in IST
+        history_df_display['match_date'] = history_df_display['match_date'].dt.strftime('%B %d, %Y at %I:%M %p IST')
         
         cards_html = "<div>"
         for _, row in history_df_display.iterrows():
