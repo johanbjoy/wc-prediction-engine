@@ -242,8 +242,9 @@ def run_pipeline(fixture_id=None):
     cache_key = f"tactical_{fid}"
     tactical_preview = _cache_get(cache_key)
     if not tactical_preview:
-        logger.info("  Agent 1: requesting tactical preview from DeepSeek R1…")
-        tactical_preview = call_openrouter(build_tactical_prompt(home_team, away_team, home_players, away_players))
+        logger.info("  Agent 1: requesting tactical preview from Groq LLaMA 3.3…")
+        from agents.analyst import call_llm, build_tactical_prompt
+        tactical_preview = call_llm(build_tactical_prompt(home_team, away_team, home_players, away_players))
         if tactical_preview:
             _cache_set(cache_key, tactical_preview)
             logger.info("  Agent 1: preview received and cached.")

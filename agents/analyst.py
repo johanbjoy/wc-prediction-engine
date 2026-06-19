@@ -4,8 +4,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "")
-OPENROUTER_MODEL = "anthropic/claude-3.7-sonnet"
+GROQ_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL = "llama-3.3-70b-versatile"
 
 def _fmt_squad(team: str, players: list[dict]) -> str:
     lines = [f"  {p['player_name']} [{p.get('position','?')}] rating={p['rating']:.1f} goals={p['goals']} xG={p['xG']:.2f} form={p['form_metric']:.1f}" for p in players[:11]]
@@ -24,17 +24,16 @@ SQUAD DATA:
 Cover: key player matchups, attacking vs defensive strengths, predicted tempo.
 No score prediction. Pure tactical analysis."""
 
-def call_openrouter(prompt: str) -> str | None:
-    if not OPENROUTER_KEY:
-        logger.warning("OPENROUTER_API_KEY not set — Agent 1 skipped.")
+def call_llm(prompt: str) -> str | None:
+    if not GROQ_KEY:
+        logger.warning("GROQ_API_KEY not set — Agent 1 skipped.")
         return None
     try:
-        r = requests.post("https://openrouter.ai/api/v1/chat/completions", headers={
-            "Authorization": f"Bearer {OPENROUTER_KEY}", "Content-Type": "application/json",
-            "HTTP-Referer": "https://wc2026-predictor.local", "X-Title": "WC2026 Predictor",
-        }, json={"model": OPENROUTER_MODEL, "messages": [{"role": "user", "content": prompt}]}, timeout=30)
+        r = requests.post("https://api.groq.com/openai/v1/chat/completions", headers={
+            "Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json",
+        }, json={"model": GROQ_MODEL, "messages": [{"role": "user", "content": prompt}]}, timeout=30)
         r.raise_for_status()
         return r.json()["choices"][0]["message"]["content"]
     except Exception as e:
-        logger.error(f"OpenRouter call failed: {e}")
+        logger.error(f"Groq API call failed: {e}")
         return None
