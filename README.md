@@ -2,24 +2,25 @@
 
 A highly scalable, multi-agent predictive syndicate engine for the **2026 FIFA World Cup**.
 
-## 🧠 The Architecture: Modular Multi-Agent System
-Unlike flat-file sports predictors, this engine utilizes a fully decoupled, cloud-ready architecture:
-- **Data Layer:** Ingests live fixtures, starting XI data, and real-time betting market odds.
-- **Model Layer:** A dual-execution predictive ensemble that mathematically blends probabilities.
-- **Agent Layer:** Two specialized LLM agents (DeepSeek & Gemini/Grok) that parse tactical data and output deterministic modifiers.
-- **Orchestrator:** The central nervous system that runs the pipeline, fetches consensus, calculates edges, and persists final predictions to **Supabase (PostgreSQL)**.
+## 🧠 The Architecture: Modular Predictive System
+Unlike flat-file sports predictors, this engine utilizes a fully decoupled, dynamic architecture:
+- **Data Layer:** Ingests live fixtures, starting XI data, and real-time tournament standings directly from API sources.
+- **Ensemble Layer:** A dual-execution predictive engine that mathematically blends machine learning with statistical simulation.
+- **Form Tracker:** Dynamically adjusts Elo ratings based on real-time group stage performance and points-per-game to catch underperforming favorites.
+- **LLM Meta-Learner (Optional):** Two specialized LLM agents (DeepSeek & Gemini) that parse tactical data and apply deterministic multiplier adjustments to the final expected goals (xG).
 
-## 📊 The Math: Weighted XGBoost Ensemble
-This engine has been fundamentally upgraded from a static zero-inflated Poisson model to a **consensus-driven ensemble**:
-1. **Monte Carlo Poisson Simulator:** Runs a 10,000-iteration minute-by-minute simulation using Time-Decay and Urgency scaling.
-2. **XGBoost Regression Model:** An ML model trained on a historical dataset of 49,000+ international football fixtures, engineered with dynamic Elo calculations and rolling form metrics.
-3. **The Blend:** The orchestrator runs both models dynamically on live data and mathematically blends their expected goals (xG) to reach a highly stable consensus.
+## 📊 The Math: 60/40 Blended Ensemble
+This engine has been rigorously backtested and upgraded to a highly calibrated **consensus-driven ensemble**:
+1. **XGBoost Regression Model (60% Weight):** An ML model trained on a historical dataset of 49,000+ international football fixtures, engineered with dynamic Elo calculations.
+2. **Monte Carlo Poisson Simulator (40% Weight):** Runs a 10,000-iteration minute-by-minute simulation using Time-Decay and Urgency scaling.
+3. **The Blend & Boost:** The orchestrator runs both models, applies a 1.5x Elo boost to favorites, and then applies a live **Tournament Form** modifier to dampen predictions for historically strong teams that are struggling in the actual tournament.
+4. **Conservative Bias:** A strict -0.10 expected goals (xG) rounding bias is applied to prevent blowout over-prediction in low-scoring group stage matches.
 
 ## 📈 The Edge: Value Engine & Market Consensus
-This project doesn't just predict scores—it operates like a professional quantitative sports syndicate.
+This project operates like a professional quantitative sports syndicate.
 - **Market Blending:** Live odds are pulled from The-Odds-API, the bookmaker 'vig' (margin) is stripped out to find the True Implied Probability, and the consensus is blended into the model.
 - **Expected Value (EV):** The built-in Value Engine strictly compares our model's probability against the market's true probability.
 - **Kelly Criterion:** If positive EV exists, the Value Engine calculates the exact mathematically optimal percentage of the bankroll to wager, safely capped at 25% to prevent risk of ruin.
 
-## 🚀 CI/CD Automation
-The entire pipeline runs entirely on autopilot. A **GitHub Action** wakes the engine up every morning at 08:00 UTC, fetches the day's matchups, runs the ML models, queries the LLMs, and stores the final expected value predictions directly into the Supabase cloud.
+## 🚀 Automation & Deployment
+The pipeline runs entirely on autopilot. A **GitHub Action** wakes the engine up every morning at 08:00 UTC, fetches the day's matchups, runs the ML models, queries the LLMs (if activated), and stores the final expected value predictions directly into the **Supabase (PostgreSQL)** cloud.

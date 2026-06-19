@@ -13,5 +13,11 @@ venv/
 # Secrets
 .env
 
+# Local Databases
+wc2026.db
+
 # Large data files (download via train_xgboost.py)
 results.csv
+
+# Logs
+*.log
