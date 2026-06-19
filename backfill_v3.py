@@ -93,7 +93,7 @@ def run_backfill():
                         predicted_home_score = EXCLUDED.predicted_home_score,
                         predicted_away_score = EXCLUDED.predicted_away_score,
                         meta_json = EXCLUDED.meta_json
-                """, (fid, "nexus_v3", pred_h, pred_a, meta_json))
+                """, (fid, "nexus_v2", pred_h, pred_a, meta_json))
             conn.commit()
         finally:
             conn.close()
@@ -113,7 +113,7 @@ def run_backfill():
                     WHEN (p.predicted_home_score = p.predicted_away_score AND f.real_home_score = f.real_away_score) THEN 1
                     ELSE 0 END
                 FROM fixtures f
-                WHERE p.fixture_id = f.id AND p.model_name = 'nexus_v3'
+                WHERE p.fixture_id = f.id AND p.model_name = 'nexus_v2'
             """)
         conn.commit()
     finally:

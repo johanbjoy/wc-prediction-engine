@@ -175,7 +175,7 @@ def run_pipeline(fixture_id=None):
         return None
 
     home_team, away_team, fid = fixture["home_team"], fixture["away_team"], fixture["id"]
-    model_tag = f"nexus_v2+{AGENT2_BACKEND}+deepseek-r1"
+    model_tag = "nexus_v2"
     logger.info(f"▶ {home_team} vs {away_team} (fixture {fid})")
 
     existing = _prediction_exists(fid, model_tag)
