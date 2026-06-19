@@ -95,13 +95,21 @@ def load_worldcup_data():
     for row in comp + upc:
         # Parse probabilities
         probs = {}
-        if isinstance(row.get("probabilities"), str):
+        if isinstance(row.get("meta_json"), str):
             try:
-                probs = json.loads(row["probabilities"])
+                meta = json.loads(row["meta_json"])
+                if "probabilities" in meta:
+                    probs = meta["probabilities"]
+                elif "dixon_coles_probs" in meta:
+                    probs = meta["dixon_coles_probs"]
             except:
                 pass
-        elif isinstance(row.get("probabilities"), dict):
-            probs = row["probabilities"]
+        elif isinstance(row.get("meta_json"), dict):
+            meta = row["meta_json"]
+            if "probabilities" in meta:
+                probs = meta["probabilities"]
+            elif "dixon_coles_probs" in meta:
+                probs = meta["dixon_coles_probs"]
             
         h_prob = probs.get("p_home_win", 0.0)
         d_prob = probs.get("p_draw", 0.0)
@@ -277,9 +285,9 @@ if len(filtered_df) == 0:
     st.stop()
 
 # ============================================
-# TABS: HISTORY, PREDICTIONS, UPCOMING
+# TABS: HISTORY, PREDICTIONS, UPCOMING, SIMULATION
 # ============================================
-tab1, tab2, tab3 = st.tabs(["📜 Prediction History", "🎯 Latest Predictions", "📅 Upcoming Matches"])
+tab1, tab2, tab3, tab4 = st.tabs(["📜 Prediction History", "🎯 Latest Predictions", "📅 Upcoming Matches", "🏆 Projected Bracket"])
 
 # ============================================
 # TAB 1: PREDICTION HISTORY
@@ -454,6 +462,62 @@ with tab3:
             use_container_width=True,
             hide_index=True
         )
+
+# ============================================
+# TAB 4: SIMULATION BRACKET
+# ============================================
+with tab4:
+    st.subheader("🏆 N.E.X.U.S. V3 Simulated Tournament Bracket")
+    st.markdown("This tab displays a full 100% autonomous simulation of the 2026 World Cup from the projected 48 qualified teams down to the final champion, predicted by the **PyTorch Transformer**.")
+    
+    import os
+    bracket_file = "tournament_bracket.json"
+    if os.path.exists(bracket_file):
+        with open(bracket_file, "r") as f:
+            bracket_data = json.load(f)
+            
+        champ = bracket_data.get("champion", "TBD")
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, {WC2026_COLORS['accent']}, #FDE68A); padding: 30px; border-radius: 20px; text-align: center; margin: 20px 0; box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);">
+            <h2 style="color: {WC2026_COLORS['secondary']}; margin-bottom: 5px;">WORLD CHAMPION 2026</h2>
+            <h1 style="color: #B45309; font-size: 3.5rem; margin: 0; text-transform: uppercase;">🏆 {champ} 🏆</h1>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("### Knockout Stages")
+        
+        # Group matches by stage
+        stages = ["Round of 32", "Round of 16", "Quarter Finals", "Semi Finals", "Final"]
+        
+        for stage in reversed(stages): # Show Final at the top
+            stage_matches = [m for m in bracket_data.get("matches", []) if m["stage"] == stage]
+            if not stage_matches: continue
+            
+            st.markdown(f"#### {stage}")
+            
+            cols = st.columns(len(stage_matches) if len(stage_matches) <= 4 else 4)
+            for i, match in enumerate(stage_matches):
+                col = cols[i % len(cols)]
+                with col:
+                    winner_color = WC2026_COLORS['green']
+                    st.markdown(f"""
+                    <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid {WC2026_COLORS['secondary']}; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-weight: {'bold' if match['winner'] == match['home'] else 'normal'}; color: {'#1e293b' if match['winner'] == match['home'] else '#94a3b8'};">{match['home']}</span>
+                            <span style="font-weight: bold; color: {WC2026_COLORS['primary']};">{match['home_score']}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-weight: {'bold' if match['winner'] == match['away'] else 'normal'}; color: {'#1e293b' if match['winner'] == match['away'] else '#94a3b8'};">{match['away']}</span>
+                            <span style="font-weight: bold; color: {WC2026_COLORS['primary']};">{match['away_score']}</span>
+                        </div>
+                        <div style="font-size: 0.7rem; color: #cbd5e1; text-align: center; margin-top: 8px;">
+                            N.E.X.U.S. Confidence: {max(match['home_prob'], match['away_prob']):.1%}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+    else:
+        st.info("The Tournament Simulation is currently compiling. Please check back in a few minutes when the backfill is complete.")
 
 # ============================================
 # FOOTER
