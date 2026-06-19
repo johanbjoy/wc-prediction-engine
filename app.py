@@ -103,6 +103,106 @@ div[data-testid="stMetricValue"] {
     font-size: 2.5rem !important;
     color: #ffffff;
 }
+/* Google-style Score Cards */
+.score-card {
+    background: rgba(15, 15, 15, 0.9);
+    border: 1px solid #262626;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
+}
+.score-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+    transform: scale(1.01);
+}
+.score-team {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #f8fafc;
+    flex: 1;
+}
+.score-home { text-align: right; }
+.score-away { text-align: left; }
+.score-center {
+    flex: 0.5;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.score-actual {
+    font-size: 1.8rem;
+    font-weight: 900;
+    font-family: 'Outfit', sans-serif;
+    color: #ffffff;
+    letter-spacing: 2px;
+}
+.badge-exact {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    margin-top: 4px;
+}
+.badge-correct {
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid #3b82f6;
+    color: #60a5fa;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+.badge-wrong {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid #ef4444;
+    color: #f87171;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+.predicted-sub {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+/* Bracket Animations */
+.bracket-node {
+    animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0;
+}
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+.champ-card {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(180, 83, 9, 0.3));
+    border: 2px solid #f59e0b;
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
+    animation: goldenPulse 2s infinite;
+}
+@keyframes goldenPulse {
+    0% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.2); }
+    50% { box-shadow: 0 0 40px rgba(245, 158, 11, 0.5); }
+    100% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.2); }
+}
 /* Log Console */
 .log-console {
     background-color: #000000;
@@ -230,12 +330,16 @@ def load_worldcup_data():
             
         is_upcoming = actual_out is None
         
-        # Accuracy representation (using confidence of correct call, or base accuracy)
-        model_acc = h_prob if actual_out == 'H' else (a_prob if actual_out == 'A' else d_prob)
-        if model_acc == 0: model_acc = max(h_prob, a_prob, d_prob)
+        # Process model accuracy if historical
+        model_acc = 0.0
+        if not is_upcoming and row.get("points_awarded") is not None:
+            pts = row.get("points_awarded")
+            if pts == 3: model_acc = 1.0 # Exact score
+            elif pts == 1: model_acc = 0.5 # Correct result
+            else: model_acc = 0.0
         
         all_rows.append({
-            'match_id': row.get("id"),
+            'match_id': row.get("fixture_id", 0),
             'match_date': m_date,
             'home_team': row.get("home_team"),
             'away_team': row.get("away_team"),
@@ -248,6 +352,8 @@ def load_worldcup_data():
             'draw_prob': d_prob,
             'away_win_prob': a_prob,
             'predicted_result': pred_out,
+            'pred_h_score': row.get("predicted_home_score"),
+            'pred_a_score': row.get("predicted_away_score"),
             'actual_result': actual_out,
             'actual_score': actual_score,
             'model_accuracy': model_acc if not is_upcoming else 0.0,
@@ -390,47 +496,51 @@ with tab1:
     if len(historical_df) > 0:
         history_cols = ['match_date', 'home_team', 'away_team', 'stage', 
                        'home_win_prob', 'predicted_result', 'actual_result', 
-                       'actual_score']
+                       'actual_score', 'pred_h_score', 'pred_a_score', 'model_accuracy']
         
         history_df_display = historical_df[history_cols].copy()
         history_df_display['match_date'] = history_df_display['match_date'].dt.strftime('%B %d, %Y')
-        history_df_display['Home Win %'] = history_df_display['home_win_prob'].apply(lambda x: f'{x:.1%}')
         
-        # Color correct/incorrect predictions
-        history_df_display['Result'] = history_df_display.apply(
-            lambda row: '✅ Correct' if row['predicted_result'] == row['actual_result'] else '❌ Incorrect',
-            axis=1
-        )
-    
-        html_table = f"""
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-family: 'Inter', sans-serif;">
-            <tr style="background-color: rgba(30, 41, 59, 0.8); border-bottom: 2px solid #333; text-align: left;">
-                <th style="padding: 12px; color: #94a3b8;">Date</th>
-                <th style="padding: 12px; color: #94a3b8;">Match</th>
-                <th style="padding: 12px; color: #94a3b8;">Predicted Result</th>
-                <th style="padding: 12px; color: #94a3b8;">Actual Result</th>
-                <th style="padding: 12px; color: #94a3b8;">Status</th>
-            </tr>
-        """
+        cards_html = "<div>"
         for _, row in history_df_display.iterrows():
             date = row['match_date']
-            match = f"{row['home_team']} vs {row['away_team']}"
+            home = row['home_team']
+            away = row['away_team']
             pred = row['predicted_result']
-            actual = f"{row['actual_score']} ({row['actual_result']})"
-            status = row['Result']
-            status_color = "#10b981" if "✅" in status else "#ef4444"
+            actual = row['actual_result']
+            act_score_str = row['actual_score']
+            pred_h = row['pred_h_score']
+            pred_a = row['pred_a_score']
+            acc = row['model_accuracy']
             
-            html_table += f"""
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background-color: rgba(15, 15, 15, 0.5);">
-                <td style="padding: 12px; color: #cbd5e1; font-size: 0.9rem;">{date}</td>
-                <td style="padding: 12px; font-weight: bold; color: #f8fafc;">{match}</td>
-                <td style="padding: 12px; color: #3b82f6;">{pred}</td>
-                <td style="padding: 12px; color: #f8fafc;">{actual}</td>
-                <td style="padding: 12px; color: {status_color}; font-weight: bold;">{status}</td>
-            </tr>
+            # Formatted predicted string
+            if pd.notna(pred_h) and pd.notna(pred_a):
+                pred_str = f"Predicted: {int(pred_h)}-{int(pred_a)}"
+            else:
+                pred_str = f"Predicted: {pred}"
+            
+            # Exact score check logic using model_accuracy (1.0 = exact, 0.5 = correct outcome)
+            if acc == 1.0:
+                badge = '<div class="badge-exact">🎯 Exact Score</div>'
+            elif acc > 0.0 or pred == actual:
+                badge = '<div class="badge-correct">✅ Correct Winner</div>'
+            else:
+                badge = '<div class="badge-wrong">❌ Incorrect</div>'
+                
+            cards_html += f"""
+            <div class="score-card">
+                <div class="score-team score-home">{home}</div>
+                <div class="score-center">
+                    <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 5px;">{date}</div>
+                    <div class="score-actual">{act_score_str}</div>
+                    <div class="predicted-sub">{pred_str}</div>
+                    {badge}
+                </div>
+                <div class="score-team score-away">{away}</div>
+            </div>
             """
-        html_table += "</table>"
-        st.markdown(html_table, unsafe_allow_html=True)
+        cards_html += "</div>"
+        st.markdown(cards_html, unsafe_allow_html=True)
 
 # ============================================
 # TAB 2: LATEST PREDICTIONS
@@ -480,42 +590,36 @@ with tab2:
         top_df_display['Draw %'] = top_df_display['draw_prob'].apply(lambda x: f'{x:.1%}')
         top_df_display['Away Win %'] = top_df_display['away_win_prob'].apply(lambda x: f'{x:.1%}')
         
-        html_top = f"""
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-family: 'Inter', sans-serif;">
-            <tr style="background-color: rgba(30, 41, 59, 0.8); border-bottom: 2px solid #333; text-align: left;">
-                <th style="padding: 12px; color: #94a3b8;">Date</th>
-                <th style="padding: 12px; color: #94a3b8;">Match</th>
-                <th style="padding: 12px; color: #94a3b8;">Predicted Result</th>
-                <th style="padding: 12px; color: #94a3b8;">Home Win Prob</th>
-                <th style="padding: 12px; color: #94a3b8;">Away Win Prob</th>
-            </tr>
-        """
+        cards_html = "<div>"
         for _, row in top_df_display.iterrows():
             date = row['match_date']
-            match = f"{row['home_team']} vs {row['away_team']}"
+            home = row['home_team']
+            away = row['away_team']
             
             # Predict the winner string purely for display
             if row['home_win_prob'] > row['away_win_prob'] and row['home_win_prob'] > row['draw_prob']:
-                pred = f"{row['home_team']} Win"
+                pred = f"{home} Win"
             elif row['away_win_prob'] > row['home_win_prob'] and row['away_win_prob'] > row['draw_prob']:
-                pred = f"{row['away_team']} Win"
+                pred = f"{away} Win"
             else:
                 pred = "Draw"
                 
             h_prob = row['Home Win %']
             a_prob = row['Away Win %']
             
-            html_top += f"""
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background-color: rgba(15, 15, 15, 0.5);">
-                <td style="padding: 12px; color: #cbd5e1; font-size: 0.9rem;">{date}</td>
-                <td style="padding: 12px; font-weight: bold; color: #f8fafc;">{match}</td>
-                <td style="padding: 12px; color: #3b82f6;">{pred}</td>
-                <td style="padding: 12px; color: #10b981;">{h_prob}</td>
-                <td style="padding: 12px; color: #f59e0b;">{a_prob}</td>
-            </tr>
+            cards_html += f"""
+            <div class="score-card" style="border-color: rgba(59, 130, 246, 0.3);">
+                <div class="score-team score-home">{home} <br><span style="font-size: 0.8rem; color: #10b981;">{h_prob}</span></div>
+                <div class="score-center">
+                    <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 5px;">{date}</div>
+                    <div class="score-actual" style="font-size: 1.2rem; color: #3b82f6;">{pred}</div>
+                    <div class="predicted-sub">Highest Confidence Prediction</div>
+                </div>
+                <div class="score-team score-away">{away} <br><span style="font-size: 0.8rem; color: #f59e0b;">{a_prob}</span></div>
+            </div>
             """
-        html_top += "</table>"
-        st.markdown(html_top, unsafe_allow_html=True)
+        cards_html += "</div>"
+        st.markdown(cards_html, unsafe_allow_html=True)
 
 # ============================================
 # TAB 3: UPCOMING MATCHES
@@ -587,43 +691,59 @@ with tab4:
             
         champ = bracket_data.get("champion", "TBD")
         st.markdown(f"""
-        <div style="background: linear-gradient(135deg, {WC2026_COLORS['accent']}, #FDE68A); padding: 30px; border-radius: 20px; text-align: center; margin: 20px 0; box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);">
-            <h2 style="color: {WC2026_COLORS['secondary']}; margin-bottom: 5px;">WORLD CHAMPION 2026</h2>
-            <h1 style="color: #B45309; font-size: 3.5rem; margin: 0; text-transform: uppercase;">🏆 {champ} 🏆</h1>
+        <div class="champ-card" style="padding: 30px; border-radius: 20px; text-align: center; margin: 20px 0;">
+            <h2 style="color: #f59e0b; margin-bottom: 5px; font-family: 'Inter';">WORLD CHAMPION 2026</h2>
+            <h1 style="color: #f8fafc; font-size: 3.5rem; margin: 0; text-transform: uppercase; font-family: 'Outfit';">🏆 {champ} 🏆</h1>
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("### Knockout Stages")
+        st.markdown("### 🌳 Knockout Stages")
         
         # Group matches by stage
-        stages = ["Round of 32", "Round of 16", "Quarter Finals", "Semi Finals", "Final"]
+        stages = ["Final", "Semi Finals", "Quarter Finals", "Round of 16", "Round of 32"]
         
-        for stage in reversed(stages): # Show Final at the top
+        delay = 0.2
+        for stage in stages:
             stage_matches = [m for m in bracket_data.get("matches", []) if m["stage"] == stage]
             if not stage_matches: continue
             
-            st.markdown(f"#### {stage}")
+            st.markdown(f"<h4 style='color: #3b82f6; margin-top: 30px;'>{stage}</h4>", unsafe_allow_html=True)
             
-            cols = st.columns(len(stage_matches) if len(stage_matches) <= 4 else 4)
-            for i, match in enumerate(stage_matches):
-                col = cols[i % len(cols)]
-                with col:
-                    winner_color = WC2026_COLORS['green']
-                    st.markdown(f"""
-                    <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid {WC2026_COLORS['secondary']}; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <span style="font-weight: {'bold' if match['winner'] == match['home'] else 'normal'}; color: {'#1e293b' if match['winner'] == match['home'] else '#94a3b8'};">{match['home']}</span>
-                            <span style="font-weight: bold; color: {WC2026_COLORS['primary']};">{match['home_score']}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="font-weight: {'bold' if match['winner'] == match['away'] else 'normal'}; color: {'#1e293b' if match['winner'] == match['away'] else '#94a3b8'};">{match['away']}</span>
-                            <span style="font-weight: bold; color: {WC2026_COLORS['primary']};">{match['away_score']}</span>
-                        </div>
-                        <div style="font-size: 0.7rem; color: #cbd5e1; text-align: center; margin-top: 8px;">
-                            N.E.X.U.S. Confidence: {max(match['home_prob'], match['away_prob']):.1%}
-                        </div>
+            # Using custom HTML grid for bracket nodes instead of st.columns for better animation control
+            bracket_html = f'<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">'
+            
+            for match in stage_matches:
+                home = match['home']
+                away = match['away']
+                hs = match['home_score']
+                _as = match['away_score']
+                winner = match['winner']
+                
+                home_color = "#10b981" if winner == home else "#64748b"
+                away_color = "#10b981" if winner == away else "#64748b"
+                
+                conf = max(match['home_prob'], match['away_prob'])
+                
+                bracket_html += f"""
+                <div class="bracket-node" style="animation-delay: {delay}s; background: rgba(15,15,15,0.8); border: 1px solid #262626; border-radius: 10px; padding: 12px; position: relative; overflow: hidden;">
+                    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: {'#10b981' if hs > _as else '#3b82f6'};"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-weight: bold; color: {home_color}; font-family: 'Inter';">{home}</span>
+                        <span style="font-weight: 900; font-size: 1.2rem; color: #f8fafc; font-family: 'Outfit';">{hs}</span>
                     </div>
-                    """, unsafe_allow_html=True)
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: bold; color: {away_color}; font-family: 'Inter';">{away}</span>
+                        <span style="font-weight: 900; font-size: 1.2rem; color: #f8fafc; font-family: 'Outfit';">{_as}</span>
+                    </div>
+                    <div style="text-align: right; margin-top: 8px; font-size: 0.7rem; color: #475569;">
+                        N.E.X.U.S. Confidence: {conf:.1%}
+                    </div>
+                </div>
+                """
+                delay += 0.1
+            
+            bracket_html += "</div>"
+            st.markdown(bracket_html, unsafe_allow_html=True)
                     
     else:
         st.info("The Tournament Simulation is currently compiling. Please check back in a few minutes when the backfill is complete.")
