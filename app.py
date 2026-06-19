@@ -528,17 +528,17 @@ with tab1:
                 badge = '<div class="badge-wrong">❌ Incorrect</div>'
                 
             cards_html += f"""
-            <div class="score-card">
-                <div class="score-team score-home">{home}</div>
-                <div class="score-center">
-                    <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 5px;">{date}</div>
-                    <div class="score-actual">{act_score_str}</div>
-                    <div class="predicted-sub">{pred_str}</div>
-                    {badge}
-                </div>
-                <div class="score-team score-away">{away}</div>
-            </div>
-            """
+<div class="score-card">
+    <div class="score-team score-home">{home}</div>
+    <div class="score-center">
+        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 5px;">{date}</div>
+        <div class="score-actual">{act_score_str}</div>
+        <div class="predicted-sub">{pred_str}</div>
+        {badge}
+    </div>
+    <div class="score-team score-away">{away}</div>
+</div>
+"""
         cards_html += "</div>"
         st.markdown(cards_html, unsafe_allow_html=True)
 
@@ -608,16 +608,16 @@ with tab2:
             a_prob = row['Away Win %']
             
             cards_html += f"""
-            <div class="score-card" style="border-color: rgba(59, 130, 246, 0.3);">
-                <div class="score-team score-home">{home} <br><span style="font-size: 0.8rem; color: #10b981;">{h_prob}</span></div>
-                <div class="score-center">
-                    <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 5px;">{date}</div>
-                    <div class="score-actual" style="font-size: 1.2rem; color: #3b82f6;">{pred}</div>
-                    <div class="predicted-sub">Highest Confidence Prediction</div>
-                </div>
-                <div class="score-team score-away">{away} <br><span style="font-size: 0.8rem; color: #f59e0b;">{a_prob}</span></div>
-            </div>
-            """
+<div class="score-card" style="border-color: rgba(59, 130, 246, 0.3);">
+    <div class="score-team score-home">{home} <br><span style="font-size: 0.8rem; color: #10b981;">{h_prob}</span></div>
+    <div class="score-center">
+        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 5px;">{date}</div>
+        <div class="score-actual" style="font-size: 1.2rem; color: #3b82f6;">{pred}</div>
+        <div class="predicted-sub">Highest Confidence Prediction</div>
+    </div>
+    <div class="score-team score-away">{away} <br><span style="font-size: 0.8rem; color: #f59e0b;">{a_prob}</span></div>
+</div>
+"""
         cards_html += "</div>"
         st.markdown(cards_html, unsafe_allow_html=True)
 
@@ -725,21 +725,21 @@ with tab4:
                 conf = max(match['home_prob'], match['away_prob'])
                 
                 bracket_html += f"""
-                <div class="bracket-node" style="animation-delay: {delay}s; background: rgba(15,15,15,0.8); border: 1px solid #262626; border-radius: 10px; padding: 12px; position: relative; overflow: hidden;">
-                    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: {'#10b981' if hs > _as else '#3b82f6'};"></div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-weight: bold; color: {home_color}; font-family: 'Inter';">{home}</span>
-                        <span style="font-weight: 900; font-size: 1.2rem; color: #f8fafc; font-family: 'Outfit';">{hs}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: bold; color: {away_color}; font-family: 'Inter';">{away}</span>
-                        <span style="font-weight: 900; font-size: 1.2rem; color: #f8fafc; font-family: 'Outfit';">{_as}</span>
-                    </div>
-                    <div style="text-align: right; margin-top: 8px; font-size: 0.7rem; color: #475569;">
-                        N.E.X.U.S. Confidence: {conf:.1%}
-                    </div>
-                </div>
-                """
+<div class="bracket-node" style="animation-delay: {delay}s; background: rgba(15,15,15,0.8); border: 1px solid #262626; border-radius: 10px; padding: 12px; position: relative; overflow: hidden;">
+    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: {'#10b981' if hs > _as else '#3b82f6'};"></div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-weight: bold; color: {home_color}; font-family: 'Inter';">{home}</span>
+        <span style="font-weight: 900; font-size: 1.2rem; color: #f8fafc; font-family: 'Outfit';">{hs}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: bold; color: {away_color}; font-family: 'Inter';">{away}</span>
+        <span style="font-weight: 900; font-size: 1.2rem; color: #f8fafc; font-family: 'Outfit';">{_as}</span>
+    </div>
+    <div style="text-align: right; margin-top: 8px; font-size: 0.7rem; color: #475569;">
+        N.E.X.U.S. Confidence: {conf:.1%}
+    </div>
+</div>
+"""
                 delay += 0.1
             
             bracket_html += "</div>"
