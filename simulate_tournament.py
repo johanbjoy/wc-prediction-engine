@@ -52,7 +52,13 @@ def simulate_match(home, away, stage="Group Stage"):
         else:
             return {"winner": away, "home_score": 1, "away_score": 2, "home_prob": ph, "away_prob": pa, "draw_prob": pd}
 
+def write_log(msg):
+    with open("nexus.log", "a") as f:
+        f.write(msg + "\n")
+    print(msg)
+
 def simulate_tournament():
+    write_log("Starting Full Tournament Bracket Simulation...")
     random.shuffle(TEAMS)
     
     # 12 Groups of 4
@@ -61,7 +67,7 @@ def simulate_tournament():
     bracket_data = {"groups": groups, "matches": []}
     standings = {t: {"pts": 0, "gf": 0, "ga": 0} for t in TEAMS}
     
-    print("Simulating Group Stage...")
+    write_log("Simulating Group Stage...")
     # Group Stage Matches
     for g_name, g_teams in groups.items():
         for i in range(len(g_teams)):
@@ -103,7 +109,7 @@ def simulate_tournament():
     third_places = sorted(third_places, key=lambda t: (standings[t]["pts"], standings[t]["gf"] - standings[t]["ga"]), reverse=True)
     advancing.extend(third_places[:8])
     
-    print(f"Knockout Stage Teams: {len(advancing)}")
+    write_log(f"Knockout Stage Teams: {len(advancing)}")
     
     # Shuffle for Ro32
     random.shuffle(advancing)
@@ -112,7 +118,7 @@ def simulate_tournament():
     current_teams = advancing
     
     for stage in stages:
-        print(f"Simulating {stage}...")
+        write_log(f"Simulating {stage}...")
         next_teams = []
         for i in range(0, len(current_teams), 2):
             h, a = current_teams[i], current_teams[i+1]
@@ -129,12 +135,12 @@ def simulate_tournament():
         current_teams = next_teams
         if len(current_teams) == 1:
             bracket_data["champion"] = current_teams[0]
-            print(f"🏆 CHAMPION: {current_teams[0]}")
+            write_log(f"🏆 CHAMPION: {current_teams[0]}")
             break
             
     with open("tournament_bracket.json", "w") as f:
         json.dump(bracket_data, f, indent=4)
-    print("Saved to tournament_bracket.json")
+    write_log("Saved to tournament_bracket.json")
 
 if __name__ == "__main__":
     simulate_tournament()

@@ -29,48 +29,98 @@ WC2026_COLORS = {
     'dark': '#1A1A1A'
 }
 
-# Custom CSS for World Cup theme
-st.markdown(f"""
-    <style>
-    .main {{
-        background-color: {WC2026_COLORS['background']};
-    }}
-    .stApp {{
-        background-color: {WC2026_COLORS['background']};
-    }}
-    .header-text {{
-        font-family: 'Arial Black', sans-serif;
-        color: {WC2026_COLORS['secondary']};
-        font-size: 48px;
-        text-align: center;
-        margin-bottom: 20px;
-    }}
-    .subheader-text {{
-        font-family: 'Arial', sans-serif;
-        color: {WC2026_COLORS['primary']};
-        font-size: 24px;
-        text-align: center;
-        margin-bottom: 40px;
-    }}
-    .metric-card {{
-        background: linear-gradient(135deg, {WC2026_COLORS['secondary']}, {WC2026_COLORS['primary']});
-        color: {WC2026_COLORS['white']};
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }}
-    .stAlert {{
-        border-radius: 10px;
-    }}
-    .match-card {{
-        background: {WC2026_COLORS['white']};
-        border: 2px solid {WC2026_COLORS['secondary']};
-        border-radius: 10px;
-        padding: 15px;
-        margin: 10px 0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }}
-    </style>
+# Custom CSS for Premium UI
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;600&display=swap');
+
+.stApp {
+    background: radial-gradient(circle at top left, #0f172a, #020617);
+    color: #f8fafc;
+    font-family: 'Inter', sans-serif;
+}
+.header-text {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 3.5rem;
+    background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    margin-bottom: 0px;
+    animation: fadeInDown 1s ease-out;
+}
+.subheader-text {
+    font-family: 'Outfit', sans-serif;
+    color: #94a3b8;
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 40px;
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+.metric-card {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+.metric-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(139, 92, 246, 0.5);
+}
+.match-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.match-card:hover {
+    transform: scale(1.02);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+}
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+div[data-testid="stMetricValue"] {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 2.5rem !important;
+}
+/* Log Console */
+.log-console {
+    background-color: #000000;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #10b981;
+    height: 350px;
+    overflow-y: scroll;
+    box-shadow: inset 0 0 20px rgba(0,0,0,1);
+    margin-top: 20px;
+}
+.log-line { margin: 0; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.log-time { color: #64748b; margin-right: 10px; }
+.log-model { color: #3b82f6; margin-right: 10px; font-weight: bold; }
+.log-warn { color: #f59e0b; }
+.log-err { color: #ef4444; }
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+</style>
 """, unsafe_allow_html=True)
 
 # ============================================
@@ -79,6 +129,40 @@ st.markdown(f"""
 st.markdown('<div class="header-text">🏆 N.E.X.U.S. V3 - World Cup 2026</div>', unsafe_allow_html=True)
 st.markdown('<div class="subheader-text">AI-Powered Football Prediction Engine | CatBoost + Transformer Hybrid</div>', unsafe_allow_html=True)
 
+
+# ============================================
+# LIVE ENGINE CONSOLE
+# ============================================
+st.markdown("### ⚡ Live Autonomous Engine Status")
+log_content = ""
+try:
+    with open("nexus.log", "r") as f:
+        lines = f.readlines()[-20:] # Get last 20 lines
+        for line in lines:
+            line = line.strip()
+            if not line: continue
+            time_str = datetime.now().strftime("%H:%M:%S")
+            if "WARNING" in line:
+                log_content += f'<div class="log-line"><span class="log-time">[{time_str}]</span><span class="log-model">N.E.X.U.S.</span><span class="log-warn">{line}</span></div>'
+            elif "ERROR" in line:
+                log_content += f'<div class="log-line"><span class="log-time">[{time_str}]</span><span class="log-model">N.E.X.U.S.</span><span class="log-err">{line}</span></div>'
+            else:
+                log_content += f'<div class="log-line"><span class="log-time">[{time_str}]</span><span class="log-model">N.E.X.U.S.</span><span>{line}</span></div>'
+except Exception:
+    time_str = datetime.now().strftime("%H:%M:%S")
+    log_content = f'<div class="log-line"><span class="log-time">[{time_str}]</span><span class="log-model">N.E.X.U.S.</span><span>SYSTEM INITIALIZED. Awaiting live data stream...</span></div>'
+
+st.markdown(f"""
+<div class="log-console" id="logConsole">
+    {log_content}
+    <div class="log-line"><span class="log-time">[{datetime.now().strftime("%H:%M:%S")}]</span><span class="log-model">SYSTEM</span><span style="color:#3b82f6; animation: pulse 2s infinite;">Watching for pipeline triggers... █</span></div>
+</div>
+<script>
+    var consoleDiv = document.getElementById("logConsole");
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
+</script>
+""", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
 # ============================================
 # LOAD REAL DATA
@@ -243,40 +327,31 @@ else:
     accuracy = 0.0
     correct_predictions = 0
 
-# Metrics row
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    st.metric(
-        label="🏆 Total Matches",
-        value=historical_matches + upcoming_matches,
-        delta=f"+{upcoming_matches} upcoming",
-        delta_color="normal"
-    )
-
-with col2:
-    st.metric(
-        label="🎯 Model Accuracy",
-        value=f"{accuracy:.1%}",
-        delta="+21.3% vs V1",
-        delta_color="normal"
-    )
-
-with col3:
-    st.metric(
-        label="✅ Correct Predictions",
-        value=f"{correct_predictions}/{historical_matches}",
-        delta=f"{(accuracy*100):.1f}% Precision",
-        delta_color="normal"
-    )
-
-with col4:
-    st.metric(
-        label="📅 Pending Pipeline",
-        value=upcoming_matches,
-        delta="Live Scraper Active",
-        delta_color="inverse"
-    )
+# Metrics row via HTML for CSS class injection
+st.markdown(f"""
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+    <div class="metric-card">
+        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">🏆 Total Matches</div>
+        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{historical_matches + upcoming_matches}</div>
+        <div style="color: #3b82f6; font-size: 0.8rem; margin-top: 5px;">+{upcoming_matches} upcoming</div>
+    </div>
+    <div class="metric-card">
+        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">🎯 Model Accuracy</div>
+        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{accuracy:.1%}</div>
+        <div style="color: #10b981; font-size: 0.8rem; margin-top: 5px;">↑ +21.3% vs V1</div>
+    </div>
+    <div class="metric-card">
+        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">✅ Correct Predictions</div>
+        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{correct_predictions}/{historical_matches}</div>
+        <div style="color: #8b5cf6; font-size: 0.8rem; margin-top: 5px;">{(accuracy*100):.1f}% Precision</div>
+    </div>
+    <div class="metric-card">
+        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">📅 Pending Pipeline</div>
+        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{upcoming_matches}</div>
+        <div style="color: #f59e0b; font-size: 0.8rem; margin-top: 5px;">Live Scraper Active</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("---")
 
