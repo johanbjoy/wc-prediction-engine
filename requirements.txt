@@ -1,7 +1,7 @@
 streamlit
 python-dotenv
 psycopg2-binary
-xgboost
+catboost
 pandas
 numpy
 scikit-learn
