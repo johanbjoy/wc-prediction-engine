@@ -10,7 +10,7 @@ from data.database import get_completed_predictions, get_upcoming_predictions, g
 
 # Page config
 st.set_page_config(
-    page_title="N.E.X.U.S. V3 - World Cup 2026",
+    page_title="N.E.X.U.S. V2 - World Cup 2026",
     page_icon="🏆",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -544,9 +544,9 @@ if len(filtered_df) == 0:
     st.stop()
 
 # ============================================
-# TABS: HISTORY AND SIMULATION
+# TABS: HISTORY, UPCOMING, SIMULATION
 # ============================================
-tab1, tab2 = st.tabs(["📜 Prediction History", "🏆 Projected Bracket"])
+tab1, tab2, tab3 = st.tabs(["📜 Prediction History", "📅 Upcoming Matches", "🏆 Projected Bracket"])
 
 # ============================================
 # TAB 1: PREDICTION HISTORY
@@ -614,10 +614,73 @@ with tab1:
         st.markdown(cards_html, unsafe_allow_html=True)
 
 # ============================================
-# TAB 2: SIMULATION BRACKET
+# TAB 2: UPCOMING MATCHES
 # ============================================
 with tab2:
-    st.subheader("🏆 N.E.X.U.S. V3 Simulated Tournament Bracket")
+    st.subheader("📅 Upcoming World Cup Matches")
+    
+    upcoming_df = filtered_df[filtered_df['is_upcoming']].sort_values('match_date')
+    
+    if len(upcoming_df) == 0:
+        st.info("No upcoming matches are scheduled at this time. Awaiting API sync.")
+    else:
+        st.markdown("### ⚡ Live Autonomous Predictions")
+        
+        upcoming_cols = ['match_date', 'home_team', 'away_team', 'stage',
+                        'home_win_prob', 'draw_prob', 'away_win_prob',
+                        'pred_h_score', 'pred_a_score']
+        
+        upcoming_df_display = upcoming_df[upcoming_cols].copy()
+        upcoming_df_display['match_date'] = upcoming_df_display['match_date'].dt.strftime('%B %d, %Y at %I:%M %p IST')
+        
+        cards_html = "<div>"
+        for _, row in upcoming_df_display.iterrows():
+            date = row['match_date']
+            home = row['home_team']
+            away = row['away_team']
+            pred_h = row['pred_h_score']
+            pred_a = row['pred_a_score']
+            
+            home_flag = get_flag(home)
+            away_flag = get_flag(away)
+            
+            # Formatted predicted string
+            if pd.notna(pred_h) and pd.notna(pred_a):
+                pred_str = f"{int(pred_h)} - {int(pred_a)}"
+            else:
+                pred_str = "TBD"
+            
+            # Subtext logic
+            if row['home_win_prob'] > row['away_win_prob'] and row['home_win_prob'] > row['draw_prob']:
+                sub_str = f"Favored: {home} ({row['home_win_prob']:.1%})"
+                color = "#3b82f6"
+            elif row['away_win_prob'] > row['home_win_prob'] and row['away_win_prob'] > row['draw_prob']:
+                sub_str = f"Favored: {away} ({row['away_win_prob']:.1%})"
+                color = "#10b981"
+            else:
+                sub_str = f"Favored: Draw ({row['draw_prob']:.1%})"
+                color = "#f59e0b"
+
+            cards_html += f"""
+<div class="score-card" style="border-color: rgba(59, 130, 246, 0.3);">
+    <div class="score-team score-home">{home_flag} {home}</div>
+    <div class="score-center">
+        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 5px;">{date}</div>
+        <div class="score-actual" style="font-size: 1.8rem; color: #3b82f6; letter-spacing: 2px;">{pred_str}</div>
+        <div class="predicted-sub" style="color: {color}; font-weight: bold; margin-top: 5px;">{sub_str}</div>
+    </div>
+    <div class="score-team score-away">{away} {away_flag}</div>
+</div>
+"""
+        cards_html += "</div>"
+        st.markdown(cards_html, unsafe_allow_html=True)
+
+
+# ============================================
+# TAB 3: SIMULATION BRACKET
+# ============================================
+with tab3:
+    st.subheader("🏆 N.E.X.U.S. V2 Simulated Tournament Bracket")
     st.markdown("This tab displays a full 100% autonomous simulation of the 2026 World Cup from the projected 48 qualified teams down to the final champion, predicted by the **PyTorch Transformer**.")
     
     import os
@@ -696,7 +759,7 @@ st.markdown("---")
 st.markdown(
     f"""
     <div style="text-align: center; color: {WC2026_COLORS['secondary']};">
-        <p>🏆 N.E.X.U.S. V3 - World Cup 2026 Prediction Engine</p>
+        <p>🏆 N.E.X.U.S. V2 - World Cup 2026 Prediction Engine</p>
         <p>Built with PyTorch Transformers + DeepSeek-R1 + Groq (Llama-3) | Math Baseline: 65.0%</p>
         <p>Data sourced from API-Football & StatsBomb | Real-time updates every 30 minutes</p>
     </div>

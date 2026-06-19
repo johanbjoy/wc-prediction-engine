@@ -39,15 +39,18 @@ def run_backfill():
         pd = probs.get("p_draw", 0.33)
         pa = probs.get("p_away_win", 0.33)
         
-        # Calculate predicted scores
-        pred_h = 1
-        pred_a = 0
-        if pa > ph and pa > pd:
-            pred_h = 0
-            pred_a = 1
-        elif pd > ph and pd > pa:
-            pred_h = 1
-            pred_a = 1
+        # Calculate exact scores dynamically from xG
+        pred_h = int(round(result.get("nexus_home_xg", 1.0)))
+        pred_a = int(round(result.get("nexus_away_xg", 1.0)))
+        
+        # Ensure predicted outcome matches highest probability
+        if pa > ph and pa > pd and pred_a <= pred_h:
+            pred_a = pred_h + 1
+        elif ph > pa and ph > pd and pred_h <= pred_a:
+            pred_h = pred_a + 1
+        elif pd > ph and pd > pa and pred_h != pred_a:
+            pred_h = max(pred_h, pred_a)
+            pred_a = pred_h
             
         class NumpyEncoder(json.JSONEncoder):
             def default(self, obj):
