@@ -449,8 +449,8 @@ st.markdown("""
 <div class="hero">
     <span class="hero-icon">&#9917;</span>
     <div class="hero-title">World Cup 2026 Prediction Engine</div>
-    <div class="hero-sub">Powered by <span>XGBoost</span> &middot; Elo Heuristic &middot; Real-Time Market Odds Blending</div>
-    <div class="hero-badge"><span class="live-dot"></span>AUTONOMOUS &middot; HOURLY UPDATES</div>
+    <div class="hero-sub">Powered by <span>XGBoost</span> &middot; Poisson Simulation &middot; Live Tournament Form</div>
+    <div class="hero-badge"><span class="live-dot"></span>AUTONOMOUS &middot; 30-MINUTE UPDATES</div>
 </div>
 <div class="divider"></div>
 """, unsafe_allow_html=True)
