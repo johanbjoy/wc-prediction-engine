@@ -206,7 +206,7 @@ def check_and_evaluate_recent() -> None:
     conn = get_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT id, match_date FROM fixtures WHERE status IN ('NS','TBD') AND match_date <= date('now')")
+            cur.execute("SELECT id, match_date FROM fixtures WHERE status IN ('NS','TBD')")
             rows = cur.fetchall()
             # Filter matches that have passed the 120 minute threshold
             pending_ids = [r["id"] for r in rows if _is_120_mins_past(r["match_date"])]
