@@ -9,6 +9,17 @@ from models.poisson_model import predict as get_poisson_baseline
 from models.dixon_coles import get_dixon_coles_probs
 from data.database import get_connection
 
+# Elite feature imports
+from data.weather import get_weather_factor
+from data.transfermarkt import get_team_value_ratio
+from data.scraper import get_h2h_streak, has_coach_changed_tactics
+
+try:
+    from models.transformer_model import TransformerModel
+    TRANSFORMER_AVAILABLE = True
+except ImportError:
+    TRANSFORMER_AVAILABLE = False
+
 def _calculate_rest_days(team: str, current_match_date: str) -> float:
     """Calculates schedule congestion (days since last match)."""
     conn = get_connection()
@@ -67,9 +78,61 @@ def predict(home_team: str, away_team: str, tournament: str, current_date: str, 
         "p_home_win": dc_probs["p_home_win"],
         "p_draw": dc_probs["p_draw"],
         "p_away_win": dc_probs["p_away_win"],
-        "is_neutral": 1 # Assume World Cup is neutral for most
+        "is_neutral": 1, # Assume World Cup is neutral for most
+        "team_value_ratio": get_team_value_ratio(home_team, away_team),
+        "h2h_streak": get_h2h_streak(home_team, away_team),
+        "momentum_decay": form_h * (1.0 / max(1.0, rest_home)),
+        "weather_factor": get_weather_factor("New York"), # Placeholder for WC city
+        "coach_tactic": has_coach_changed_tactics(home_team)
     }])
     
+    # Try Transformer First (Phase 4)
+    pt_home_path = os.path.join(os.path.dirname(__file__), "saved", "nexus_home.pt")
+    pt_away_path = os.path.join(os.path.dirname(__file__), "saved", "nexus_away.pt")
+    
+    if TRANSFORMER_AVAILABLE and os.path.exists(pt_home_path) and os.path.exists(pt_away_path):
+        try:
+            # We must drop cat features since our custom transformer only takes numerical features
+            num_features = features.drop(columns=["home_team", "away_team", "tournament"])
+            
+            t_home = TransformerModel()
+            t_home.load_weights(pt_home_path)
+            t_away = TransformerModel()
+            t_away.load_weights(pt_away_path)
+            
+            pred_home = max(0.0, float(t_home.predict(num_features)[0]))
+            pred_away = max(0.0, float(t_away.predict(num_features)[0]))
+            
+            # Phase 7: Apply Dynamic Adaptive Momentum
+            from data.database import get_team_momentum
+            h_mom = get_team_momentum(home_team)
+            a_mom = get_team_momentum(away_team)
+            
+            # Apply momentum to xG
+            pred_home *= h_mom
+            pred_away *= a_mom
+            
+            # Adjust probabilities slightly based on new xG (rough approximation)
+            dc_probs["p_home_win"] *= (h_mom / ((h_mom + a_mom)/2))
+            dc_probs["p_away_win"] *= (a_mom / ((h_mom + a_mom)/2))
+            
+            # Normalize
+            total = dc_probs["p_home_win"] + dc_probs["p_draw"] + dc_probs["p_away_win"]
+            dc_probs["p_home_win"] /= total
+            dc_probs["p_draw"] /= total
+            dc_probs["p_away_win"] /= total
+            
+            return {
+                "nexus_home_xg": float(pred_home),
+                "nexus_away_xg": float(pred_away),
+                "dixon_coles_probs": dc_probs,
+                "env_context": {"rest_home": rest_home, "rest_away": rest_away},
+                "model_used": "pytorch_transformer"
+            }
+        except Exception as e:
+            print(f"Transformer fallback: {e}")
+
+    # Fallback to CatBoost
     try:
         model_home = CatBoostRegressor().load_model(home_model_path)
         model_away = CatBoostRegressor().load_model(away_model_path)
@@ -80,9 +143,29 @@ def predict(home_team: str, away_team: str, tournament: str, current_date: str, 
     pred_home = max(0.0, float(model_home.predict(features)[0]))
     pred_away = max(0.0, float(model_away.predict(features)[0]))
     
-    return {
-        "nexus_home_xg": pred_home,
-        "nexus_away_xg": pred_away,
-        "dixon_coles_probs": dc_probs,
-        "env_context": {"rest_home": rest_home, "rest_away": rest_away}
-    }
+        # Phase 7: Apply Dynamic Adaptive Momentum
+        from data.database import get_team_momentum
+        h_mom = get_team_momentum(home_team)
+        a_mom = get_team_momentum(away_team)
+        
+        # Apply momentum to xG
+        pred_home *= h_mom
+        pred_away *= a_mom
+        
+        # Adjust probabilities slightly based on new xG (rough approximation)
+        dc_probs["p_home_win"] *= (h_mom / ((h_mom + a_mom)/2))
+        dc_probs["p_away_win"] *= (a_mom / ((h_mom + a_mom)/2))
+        
+        # Normalize
+        total = dc_probs["p_home_win"] + dc_probs["p_draw"] + dc_probs["p_away_win"]
+        dc_probs["p_home_win"] /= total
+        dc_probs["p_draw"] /= total
+        dc_probs["p_away_win"] /= total
+        
+        return {
+            "nexus_home_xg": float(pred_home),
+            "nexus_away_xg": float(pred_away),
+            "dixon_coles_probs": dc_probs,
+            "env_context": {"rest_home": rest_home, "rest_away": rest_away},
+            "model_used": "catboost_v2"
+        }

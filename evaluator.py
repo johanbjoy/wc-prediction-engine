@@ -144,8 +144,31 @@ def evaluate_fixture(fixture_id: int, home_score: int | None = None, away_score:
                 scored_count += 1
 
         if scored_count > 0:
+            # --- PHASE 7: ADAPTIVE MOMENTUM UPDATE ---
+            from data.database import get_team_momentum, update_team_momentum
+            
+            home_team = fixture["home_team"]
+            away_team = fixture["away_team"]
+            
+            h_mom = get_team_momentum(home_team)
+            a_mom = get_team_momentum(away_team)
+            
+            if actual_h > actual_a:
+                update_team_momentum(home_team, min(1.5, h_mom + 0.05))
+                update_team_momentum(away_team, max(0.5, a_mom - 0.05))
+            elif actual_a > actual_h:
+                update_team_momentum(away_team, min(1.5, a_mom + 0.06))
+                update_team_momentum(home_team, max(0.5, h_mom - 0.06))
+            else:
+                if h_mom > a_mom:
+                    update_team_momentum(away_team, min(1.5, a_mom + 0.02))
+                    update_team_momentum(home_team, max(0.5, h_mom - 0.02))
+                elif a_mom > h_mom:
+                    update_team_momentum(home_team, min(1.5, h_mom + 0.02))
+                    update_team_momentum(away_team, max(0.5, a_mom - 0.02))
+            
             conn.commit()
-            logger.info(f"Fixture {fixture_id}: scored {scored_count} predictions.")
+            logger.info(f"Fixture {fixture_id}: scored {scored_count} predictions and updated momentum.")
 
     finally:
         conn.close()

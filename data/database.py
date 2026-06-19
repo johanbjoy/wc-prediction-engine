@@ -87,6 +87,15 @@ def init_db() -> None:
                 );
             """)
 
+            # Dynamic ELO / Momentum table for Phase 7
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS team_momentum (
+                    team_name       TEXT PRIMARY KEY,
+                    momentum_score  FLOAT DEFAULT 1.0,
+                    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+
         conn.commit()
         logger.info("Database tables initialized successfully (PostgreSQL).")
     finally:
@@ -126,6 +135,35 @@ def upsert_player(player_name: str, team_name: str, rating: float, goals: int, x
     finally:
         conn.close()
 
+
+def get_team_momentum(team_name: str) -> float:
+    """Fetch dynamic momentum weight for a team."""
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT momentum_score FROM team_momentum WHERE team_name = %s", (team_name,))
+            row = cur.fetchone()
+            if row:
+                return float(row["momentum_score"])
+            return 1.0 # Default multiplier
+    finally:
+        conn.close()
+
+def update_team_momentum(team_name: str, new_score: float) -> None:
+    """Update dynamic momentum weight for a team."""
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO team_momentum (team_name, momentum_score)
+                VALUES (%s, %s)
+                ON CONFLICT(team_name) DO UPDATE SET
+                    momentum_score = EXCLUDED.momentum_score,
+                    updated_at = CURRENT_TIMESTAMP
+            """, (team_name, new_score))
+        conn.commit()
+    finally:
+        conn.close()
 
 def get_upcoming_predictions(limit: int = 4) -> list[dict]:
     """Fetch predictions where the match hasn't happened yet (points_awarded IS NULL)."""

@@ -21,8 +21,45 @@ def get_elo(team):
     elif team in ["Netherlands", "Uruguay", "Croatia", "Italy"]: base = 1850
     return base + random.randint(-50, 50)
 
+def get_real_match_result(home, away):
+    from data.database import get_connection
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT real_home_score, real_away_score 
+                FROM fixtures 
+                WHERE home_team = %s AND away_team = %s AND status = 'FT'
+                ORDER BY match_date DESC LIMIT 1
+            """, (home, away))
+            row = cur.fetchone()
+            if row and row["real_home_score"] is not None:
+                return row["real_home_score"], row["real_away_score"]
+    finally:
+        conn.close()
+    return None
+
 def simulate_match(home, away, stage="Group Stage"):
     """Uses N.E.X.U.S. to predict the match outcome."""
+    
+    # Phase 7: Check if match actually happened in real life
+    real_res = get_real_match_result(home, away)
+    if real_res:
+        rh, ra = real_res
+        winner = home if rh > ra else away
+        if rh == ra and stage != "Group Stage":
+            winner = home if random.random() > 0.5 else away # PK shootout random
+        
+        return {
+            "winner": winner,
+            "home_score": rh,
+            "away_score": ra,
+            "home_prob": 1.0 if winner == home else 0.0,
+            "away_prob": 1.0 if winner == away else 0.0,
+            "draw_prob": 1.0 if rh == ra else 0.0,
+            "is_real": True
+        }
+        
     elo_h = get_elo(home)
     elo_a = get_elo(away)
     

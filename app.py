@@ -306,27 +306,29 @@ else:
     correct_predictions = 0
 
 # Metrics row via HTML for CSS class injection
+wrong_predictions = historical_matches - correct_predictions
+
 st.markdown(f"""
 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
     <div class="metric-card">
-        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">🏆 Total Matches</div>
-        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{historical_matches + upcoming_matches}</div>
+        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">🏆 Total Completed Matches</div>
+        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{historical_matches}</div>
         <div style="color: #3b82f6; font-size: 0.8rem; margin-top: 5px;">+{upcoming_matches} upcoming</div>
     </div>
     <div class="metric-card">
-        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">🎯 Model Accuracy</div>
+        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">🎯 Current Accuracy</div>
         <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{accuracy:.1%}</div>
-        <div style="color: #10b981; font-size: 0.8rem; margin-top: 5px;">↑ +21.3% vs V1</div>
+        <div style="color: #10b981; font-size: 0.8rem; margin-top: 5px;">Adaptive Momentum Active</div>
     </div>
     <div class="metric-card">
         <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">✅ Correct Predictions</div>
-        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{correct_predictions}/{historical_matches}</div>
-        <div style="color: #8b5cf6; font-size: 0.8rem; margin-top: 5px;">{(accuracy*100):.1f}% Precision</div>
+        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #10b981;">{correct_predictions}</div>
+        <div style="color: #8b5cf6; font-size: 0.8rem; margin-top: 5px;">Predicted exact outcome</div>
     </div>
     <div class="metric-card">
-        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">📅 Pending Pipeline</div>
-        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{upcoming_matches}</div>
-        <div style="color: #f59e0b; font-size: 0.8rem; margin-top: 5px;">Live Scraper Active</div>
+        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">❌ Incorrect Predictions</div>
+        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #ef4444;">{wrong_predictions}</div>
+        <div style="color: #f59e0b; font-size: 0.8rem; margin-top: 5px;">Upsets & Draws</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -379,11 +381,8 @@ with tab1:
             yaxis_title='Confidence Probability',
             yaxis=dict(range=[0.0, 1.0]),
             height=400,
-            template='plotly_white'
-        )
         st.plotly_chart(fig_accuracy, use_container_width=True)
     
-    # Prediction accuracy table
     st.markdown("### 📊 Detailed Match History")
     
     if len(historical_df) > 0:
@@ -400,12 +399,36 @@ with tab1:
             lambda row: '✅ Correct' if row['predicted_result'] == row['actual_result'] else '❌ Incorrect',
             axis=1
         )
-        
-        st.dataframe(
-            history_df_display,
-            use_container_width=True,
-            hide_index=True
-        )
+    
+        html_table = f"""
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-family: 'Inter', sans-serif;">
+            <tr style="background-color: rgba(30, 41, 59, 0.8); border-bottom: 2px solid #333; text-align: left;">
+                <th style="padding: 12px; color: #94a3b8;">Date</th>
+                <th style="padding: 12px; color: #94a3b8;">Match</th>
+                <th style="padding: 12px; color: #94a3b8;">Predicted Result</th>
+                <th style="padding: 12px; color: #94a3b8;">Actual Result</th>
+                <th style="padding: 12px; color: #94a3b8;">Status</th>
+            </tr>
+        """
+        for _, row in history_df_display.iterrows():
+            date = row['match_date']
+            match = f"{row['home_team']} vs {row['away_team']}"
+            pred = row['predicted_result']
+            actual = f"{row['actual_score']} ({row['actual_result']})"
+            status = row['Result']
+            status_color = "#10b981" if "✅" in status else "#ef4444"
+            
+            html_table += f"""
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background-color: rgba(15, 15, 15, 0.5);">
+                <td style="padding: 12px; color: #cbd5e1; font-size: 0.9rem;">{date}</td>
+                <td style="padding: 12px; font-weight: bold; color: #f8fafc;">{match}</td>
+                <td style="padding: 12px; color: #3b82f6;">{pred}</td>
+                <td style="padding: 12px; color: #f8fafc;">{actual}</td>
+                <td style="padding: 12px; color: {status_color}; font-weight: bold;">{status}</td>
+            </tr>
+            """
+        html_table += "</table>"
+        st.markdown(html_table, unsafe_allow_html=True)
 
 # ============================================
 # TAB 2: LATEST PREDICTIONS
@@ -455,11 +478,42 @@ with tab2:
         top_df_display['Draw %'] = top_df_display['draw_prob'].apply(lambda x: f'{x:.1%}')
         top_df_display['Away Win %'] = top_df_display['away_win_prob'].apply(lambda x: f'{x:.1%}')
         
-        st.dataframe(
-            top_df_display,
-            use_container_width=True,
-            hide_index=True
-        )
+        html_top = f"""
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-family: 'Inter', sans-serif;">
+            <tr style="background-color: rgba(30, 41, 59, 0.8); border-bottom: 2px solid #333; text-align: left;">
+                <th style="padding: 12px; color: #94a3b8;">Date</th>
+                <th style="padding: 12px; color: #94a3b8;">Match</th>
+                <th style="padding: 12px; color: #94a3b8;">Predicted Result</th>
+                <th style="padding: 12px; color: #94a3b8;">Home Win Prob</th>
+                <th style="padding: 12px; color: #94a3b8;">Away Win Prob</th>
+            </tr>
+        """
+        for _, row in top_df_display.iterrows():
+            date = row['match_date']
+            match = f"{row['home_team']} vs {row['away_team']}"
+            
+            # Predict the winner string purely for display
+            if row['home_win_prob'] > row['away_win_prob'] and row['home_win_prob'] > row['draw_prob']:
+                pred = f"{row['home_team']} Win"
+            elif row['away_win_prob'] > row['home_win_prob'] and row['away_win_prob'] > row['draw_prob']:
+                pred = f"{row['away_team']} Win"
+            else:
+                pred = "Draw"
+                
+            h_prob = row['Home Win %']
+            a_prob = row['Away Win %']
+            
+            html_top += f"""
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background-color: rgba(15, 15, 15, 0.5);">
+                <td style="padding: 12px; color: #cbd5e1; font-size: 0.9rem;">{date}</td>
+                <td style="padding: 12px; font-weight: bold; color: #f8fafc;">{match}</td>
+                <td style="padding: 12px; color: #3b82f6;">{pred}</td>
+                <td style="padding: 12px; color: #10b981;">{h_prob}</td>
+                <td style="padding: 12px; color: #f59e0b;">{a_prob}</td>
+            </tr>
+            """
+        html_top += "</table>"
+        st.markdown(html_top, unsafe_allow_html=True)
 
 # ============================================
 # TAB 3: UPCOMING MATCHES
