@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "")
-OPENROUTER_MODEL = "deepseek/deepseek-r1"
+OPENROUTER_MODEL = "anthropic/claude-3.7-sonnet"
 
 def _fmt_squad(team: str, players: list[dict]) -> str:
     lines = [f"  {p['player_name']} [{p.get('position','?')}] rating={p['rating']:.1f} goals={p['goals']} xG={p['xG']:.2f} form={p['form_metric']:.1f}" for p in players[:11]]
