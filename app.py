@@ -381,6 +381,8 @@ with tab1:
             yaxis_title='Confidence Probability',
             yaxis=dict(range=[0.0, 1.0]),
             height=400,
+            template='plotly_dark' # Changed to dark to match theme
+        )
         st.plotly_chart(fig_accuracy, use_container_width=True)
     
     st.markdown("### 📊 Detailed Match History")
