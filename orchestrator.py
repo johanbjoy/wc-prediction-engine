@@ -388,12 +388,15 @@ def run_all_upcoming(limit=4):
 if __name__ == "__main__":
     from data.database import init_db
     from data.scraper  import fetch_and_store_fixtures
-    from evaluator     import evaluate_all_pending, rebuild_leaderboard
+    from evaluator     import evaluate_all_pending, rebuild_leaderboard, check_and_evaluate_recent
     
     init_db()
     fetch_and_store_fixtures()
     
-    # Grade completed matches and update metrics before predicting new ones
+    # 1. Smart-check live API for any newly finished matches (post-120 mins)
+    check_and_evaluate_recent()
+
+    # 2. Grade completed matches and update metrics before predicting new ones
     evaluate_all_pending()
     rebuild_leaderboard()
     

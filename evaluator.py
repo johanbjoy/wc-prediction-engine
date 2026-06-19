@@ -176,14 +176,40 @@ def evaluate_all_pending() -> None:
     for fid in fids:
         total_scored += evaluate_fixture(fid)
 
+import re
+from datetime import datetime, timezone, timedelta
+
+def _is_120_mins_past(date_str: str) -> bool:
+    if not date_str: return False
+    m = re.search(r'(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})\s+UTC([+-]\d+)', date_str)
+    if m:
+        d_str, t_str, offset_str = m.groups()
+        try:
+            dt = datetime.strptime(f"{d_str} {t_str}", "%Y-%m-%d %H:%M")
+            utc_dt = dt - timedelta(hours=int(offset_str))
+            utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+            return datetime.now(timezone.utc) >= (utc_dt + timedelta(minutes=120))
+        except Exception:
+            return False
+    # Fallback for standard iso dates
+    try:
+        dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return datetime.now(timezone.utc) >= (dt + timedelta(minutes=120))
+    except Exception:
+        # Absolute fallback: just check if the date is in the past
+        return str(datetime.utcnow().date()) > date_str[:10]
+
 def check_and_evaluate_recent() -> None:
     """Checks the real API for recent match results, updates the DB, and evaluates."""
     conn = get_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT id FROM fixtures WHERE status IN ('NS','TBD') AND match_date <= date('now')")
+            cur.execute("SELECT id, match_date FROM fixtures WHERE status IN ('NS','TBD') AND match_date <= date('now')")
             rows = cur.fetchall()
-            pending_ids = [r["id"] for r in rows]
+            # Filter matches that have passed the 120 minute threshold
+            pending_ids = [r["id"] for r in rows if _is_120_mins_past(r["match_date"])]
     finally:
         conn.close()
 
