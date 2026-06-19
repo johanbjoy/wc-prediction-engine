@@ -29,72 +29,61 @@ WC2026_COLORS = {
     'dark': '#1A1A1A'
 }
 
-# Custom CSS for Premium UI
+# Custom CSS for Premium Dark UI
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;600&display=swap');
 
 .stApp {
-    background: radial-gradient(circle at top left, #0f172a, #020617);
-    color: #f8fafc;
+    background-color: #050505;
+    background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: #e2e8f0;
     font-family: 'Inter', sans-serif;
-}
-.header-text {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
-    font-size: 3.5rem;
-    background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-align: center;
-    margin-bottom: 0px;
-    animation: fadeInDown 1s ease-out;
 }
 .subheader-text {
     font-family: 'Outfit', sans-serif;
-    color: #94a3b8;
-    font-size: 1.5rem;
+    color: #cbd5e1;
+    font-size: 1.2rem;
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
+    margin-top: -10px;
     font-weight: 300;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 .metric-card {
-    background: rgba(30, 41, 59, 0.4);
+    background: rgba(10, 10, 10, 0.8);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
+    border: 1px solid #333333;
+    border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .metric-card:hover {
     transform: translateY(-5px);
-    border-color: rgba(139, 92, 246, 0.5);
+    border-color: #3b82f6;
+    box-shadow: 0 4px 30px rgba(59, 130, 246, 0.2);
 }
 .match-card {
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(148, 163, 184, 0.1);
-    border-radius: 16px;
+    background: rgba(15, 15, 15, 0.9);
+    border: 1px solid #262626;
+    border-radius: 12px;
     padding: 20px;
     margin: 15px 0;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
 }
 .match-card:hover {
-    transform: scale(1.02);
-    border-color: rgba(59, 130, 246, 0.5);
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
-}
-@keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    border-color: #3b82f6;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
 }
 div[data-testid="stMetricValue"] {
     font-family: 'Outfit', sans-serif;
     font-weight: 800;
     font-size: 2.5rem !important;
+    color: #ffffff;
 }
 /* Log Console */
 .log-console {
@@ -126,7 +115,9 @@ div[data-testid="stMetricValue"] {
 # ============================================
 # HEADER SECTION
 # ============================================
-st.markdown('<div class="header-text">🏆 N.E.X.U.S. V3 - World Cup 2026</div>', unsafe_allow_html=True)
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    st.image("nexus_logo.png", use_column_width=True)
 st.markdown('<div class="subheader-text">AI-Powered Football Prediction Engine | CatBoost + Transformer Hybrid</div>', unsafe_allow_html=True)
 
 
