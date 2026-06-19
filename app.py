@@ -493,6 +493,10 @@ if len(filtered_df) > 0:
         (~filtered_df['is_upcoming']) & 
         (filtered_df['predicted_result'] == filtered_df['actual_result'])
     ])
+    exact_predictions = len(filtered_df[
+        (~filtered_df['is_upcoming']) & 
+        (filtered_df['model_accuracy'] == 1.0)
+    ])
     
     accuracy = correct_predictions / historical_matches if historical_matches > 0 else 0.0
 
@@ -501,6 +505,7 @@ if len(filtered_df) > 0:
     if db_summary.get("total", 0) > 0:
         accuracy = db_summary["acc_pct"] / 100.0
         correct_predictions = db_summary["correct"]
+        exact_predictions = db_summary["exact"]
         historical_matches = db_summary["total"]
 else:
     total_matches = 0
@@ -508,31 +513,37 @@ else:
     upcoming_matches = 0
     accuracy = 0.0
     correct_predictions = 0
+    exact_predictions = 0
 
 # Metrics row via HTML for CSS class injection
 wrong_predictions = historical_matches - correct_predictions
 
 st.markdown(f"""
-<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px;">
     <div class="metric-card">
-        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">🏆 Total Completed Matches</div>
-        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{historical_matches}</div>
-        <div style="color: #3b82f6; font-size: 0.8rem; margin-top: 5px;">+{upcoming_matches} upcoming</div>
+        <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 5px;">🏆 Total Completed</div>
+        <div style="font-size: 2.2rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{historical_matches}</div>
+        <div style="color: #3b82f6; font-size: 0.75rem; margin-top: 5px;">+{upcoming_matches} upcoming</div>
     </div>
     <div class="metric-card">
-        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">🎯 Current Accuracy</div>
-        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{accuracy:.1%}</div>
-        <div style="color: #10b981; font-size: 0.8rem; margin-top: 5px;">Adaptive Momentum Active</div>
+        <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 5px;">🎯 Accuracy</div>
+        <div style="font-size: 2.2rem; font-weight: 800; font-family: 'Outfit'; color: #f8fafc;">{accuracy:.1%}</div>
+        <div style="color: #10b981; font-size: 0.75rem; margin-top: 5px;">CatBoost + ML xG Coupled</div>
     </div>
-    <div class="metric-card">
-        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">✅ Correct Predictions</div>
-        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #10b981;">{correct_predictions}</div>
-        <div style="color: #8b5cf6; font-size: 0.8rem; margin-top: 5px;">Predicted exact outcome</div>
+    <div class="metric-card" style="border-color: rgba(16, 185, 129, 0.3);">
+        <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 5px;">✅ Correct Winners</div>
+        <div style="font-size: 2.2rem; font-weight: 800; font-family: 'Outfit'; color: #10b981;">{correct_predictions}</div>
+        <div style="color: #8b5cf6; font-size: 0.75rem; margin-top: 5px;">Predicted W/D/L Outcome</div>
     </div>
-    <div class="metric-card">
-        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px;">❌ Incorrect Predictions</div>
-        <div style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #ef4444;">{wrong_predictions}</div>
-        <div style="color: #f59e0b; font-size: 0.8rem; margin-top: 5px;">Upsets & Draws</div>
+    <div class="metric-card" style="border-color: rgba(139, 92, 246, 0.3);">
+        <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 5px;">🎯 Exact Scores</div>
+        <div style="font-size: 2.2rem; font-weight: 800; font-family: 'Outfit'; color: #8b5cf6;">{exact_predictions}</div>
+        <div style="color: #d946ef; font-size: 0.75rem; margin-top: 5px;">Perfect Scoreline</div>
+    </div>
+    <div class="metric-card" style="border-color: rgba(239, 68, 68, 0.3);">
+        <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 5px;">❌ Incorrect</div>
+        <div style="font-size: 2.2rem; font-weight: 800; font-family: 'Outfit'; color: #ef4444;">{wrong_predictions}</div>
+        <div style="color: #f59e0b; font-size: 0.75rem; margin-top: 5px;">Upsets & Unpredicted Draws</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
