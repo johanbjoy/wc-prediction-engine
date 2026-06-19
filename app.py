@@ -497,8 +497,6 @@ st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
 # ─── SECTION 4: ABOUT N.E.X.U.S. V2 ────────────────────────────────────────
 st.markdown("""
-# ─── SECTION 4: ABOUT N.E.X.U.S. V2 ────────────────────────────────────────
-st.markdown("""
 <style>
 .about-grid {
     display: grid;
