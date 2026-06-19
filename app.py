@@ -495,6 +495,20 @@ with col4:
 with col5:
     st.metric(label="Accuracy", value=f"{stats['acc_pct']}%")
 
+st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+
+# ─── SECTION 4: LEGACY V1 ENGINE INFO ──────────────────────────────────────
+st.markdown("""
+<div style="background: rgba(30,41,59,0.5); border: 1px solid rgba(148,163,184,0.1); border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+    <h3 style="margin-top: 0; font-size: 1.1rem; color: #94a3b8; font-weight: 600;">⚠️ Legacy V1 Engine (Deprecated)</h3>
+    <p style="color: #64748b; font-size: 0.85rem; line-height: 1.5; margin-bottom: 0;">
+        The previous <strong>V1 N.E.X.U.S. Engine</strong> utilized a raw XGBoost architecture without Bivariate Poisson simulation. 
+        In its final internal backtest across 28 fixtures, the pure XGBoost baseline achieved only <strong>35.7% accuracy</strong> before tactical LLM adjustments. 
+        It has now been entirely replaced by the highly calibrated <strong>CatBoost V2</strong> engine, which achieves a <strong>53.6% raw mathematical floor</strong> even before the LLMs engage.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
 
 
 # ─── FOOTER / WATERMARK ────────────────────────────────────────────────────
