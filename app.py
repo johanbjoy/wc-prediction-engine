@@ -103,85 +103,125 @@ div[data-testid="stMetricValue"] {
     font-size: 2.5rem !important;
     color: #ffffff;
 }
-/* Google-style Score Cards */
+
+/* Premium Web App Styles */
+body {
+    background: radial-gradient(circle at top right, #0f172a, #000000) !important;
+    color: #f8fafc !important;
+}
+.header-text {
+    background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 5s linear infinite;
+    background-size: 200% auto;
+}
+@keyframes shine {
+    to { background-position: 200% center; }
+}
 .score-card {
-    background: rgba(15, 15, 15, 0.9);
-    border: 1px solid #262626;
-    border-radius: 12px;
-    padding: 15px 20px;
-    margin: 10px 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 20px 25px;
+    margin: 15px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .score-card:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
-    transform: scale(1.01);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+    transform: translateY(-5px) scale(1.02);
 }
 .score-team {
     font-family: 'Inter', sans-serif;
-    font-size: 1.2rem;
-    font-weight: bold;
+    font-size: 1.4rem;
+    font-weight: 800;
     color: #f8fafc;
     flex: 1;
+    letter-spacing: -0.5px;
 }
 .score-home { text-align: right; }
 .score-away { text-align: left; }
 .score-center {
-    flex: 0.5;
+    flex: 0.6;
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    position: relative;
+}
+.score-center::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
+    z-index: 0;
 }
 .score-actual {
-    font-size: 1.8rem;
+    font-size: 2.5rem;
     font-weight: 900;
     font-family: 'Outfit', sans-serif;
     color: #ffffff;
-    letter-spacing: 2px;
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.3);
+    z-index: 1;
 }
 .badge-exact {
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
     text-transform: uppercase;
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-    margin-top: 4px;
+    letter-spacing: 1px;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    margin-top: 8px;
+    z-index: 1;
+    animation: pulseBadge 2s infinite;
+}
+@keyframes pulseBadge {
+    0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+    50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.8); }
+    100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
 }
 .badge-correct {
-    background: rgba(59, 130, 246, 0.2);
-    border: 1px solid #3b82f6;
-    color: #60a5fa;
-    padding: 3px 8px;
-    border-radius: 4px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    color: #93c5fd;
+    padding: 4px 12px;
+    border-radius: 20px;
     font-size: 0.7rem;
     font-weight: bold;
     text-transform: uppercase;
-    margin-top: 4px;
+    margin-top: 8px;
+    z-index: 1;
 }
 .badge-wrong {
-    background: rgba(239, 68, 68, 0.2);
-    border: 1px solid #ef4444;
-    color: #f87171;
-    padding: 3px 8px;
-    border-radius: 4px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+    padding: 4px 12px;
+    border-radius: 20px;
     font-size: 0.7rem;
     font-weight: bold;
     text-transform: uppercase;
-    margin-top: 4px;
+    margin-top: 8px;
+    z-index: 1;
 }
 .predicted-sub {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: #94a3b8;
     margin-top: 2px;
+    font-weight: 500;
+    z-index: 1;
 }
 /* Bracket Animations */
 .bracket-node {
@@ -205,23 +245,61 @@ div[data-testid="stMetricValue"] {
 }
 /* Log Console */
 .log-console {
-    background-color: #000000;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 15px;
-    font-family: 'Courier New', monospace;
+    background-color: #050505;
+    border: 1px solid #1f2937;
+    border-radius: 12px;
+    padding: 20px;
+    font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
     font-size: 0.85rem;
-    color: #10b981;
-    height: 350px;
-    overflow-y: scroll;
-    box-shadow: inset 0 0 20px rgba(0,0,0,1);
-    margin-top: 20px;
+    height: 300px;
+    overflow-y: auto;
+    margin-bottom: 25px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 15px rgba(16, 185, 129, 0.1);
+    position: relative;
 }
-.log-line { margin: 0; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.log-time { color: #64748b; margin-right: 10px; }
-.log-model { color: #3b82f6; margin-right: 10px; font-weight: bold; }
-.log-warn { color: #f59e0b; }
-.log-err { color: #ef4444; }
+.log-console::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 2;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+}
+.log-line {
+    margin: 4px 0;
+    line-height: 1.5;
+    text-shadow: 0 0 5px rgba(255,255,255,0.3);
+}
+.log-time {
+    color: #64748b;
+    margin-right: 12px;
+}
+.log-model {
+    color: #3b82f6;
+    font-weight: bold;
+    margin-right: 12px;
+}
+.log-warn {
+    color: #f59e0b;
+}
+.log-err {
+    color: #ef4444;
+}
+.blinking-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 15px;
+    background-color: #10b981;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 5px;
+}
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
 @keyframes pulse {
     0% { opacity: 1; }
     50% { opacity: 0; }
@@ -262,7 +340,7 @@ except Exception:
 st.markdown(f"""
 <div class="log-console" id="logConsole">
     {log_content}
-    <div class="log-line"><span class="log-time">[{datetime.now().strftime("%H:%M:%S")}]</span><span class="log-model">SYSTEM</span><span style="color:#3b82f6; animation: pulse 2s infinite;">Watching for pipeline triggers... █</span></div>
+    <div class="log-line"><span class="log-time">[{datetime.now().strftime("%H:%M:%S")}]</span><span class="log-model">SYSTEM</span><span>Watching for pipeline triggers...</span><span class="blinking-cursor"></span></div>
 </div>
 <script>
     var consoleDiv = document.getElementById("logConsole");
@@ -552,37 +630,12 @@ with tab2:
     latest_df = filtered_df.sort_values('home_win_prob', ascending=False).head(20)
     
     if len(latest_df) > 0:
-        # 3D Scatter Plot: Elo vs xG vs Win Probability
-        st.markdown("### 📊 3D Prediction Space")
-        
-        fig_3d = px.scatter_3d(
-            latest_df,
-            x='home_elo',
-            y='away_elo',
-            z='home_win_prob',
-            color='home_win_prob',
-            size='home_xg',
-            hover_name='home_team',
-            title='Implied Elo vs Win Probability (3D)',
-            color_continuous_scale='RdYlGn',
-            opacity=0.8
-        )
-        fig_3d.update_layout(
-            scene=dict(
-                xaxis_title='Home Team Strength',
-                yaxis_title='Away Team Strength',
-                zaxis_title='Home Win Probability'
-            ),
-            height=600,
-            template='plotly_white'
-        )
-        st.plotly_chart(fig_3d, use_container_width=True)
-        
         # Top predictions table
         st.markdown("### 🔥 Top Confidence Predictions")
         
         top_cols = ['match_date', 'home_team', 'away_team', 'stage',
-                   'home_win_prob', 'draw_prob', 'away_win_prob']
+                   'home_win_prob', 'draw_prob', 'away_win_prob',
+                   'pred_h_score', 'pred_a_score']
         
         top_df_display = latest_df[top_cols].copy()
         top_df_display['match_date'] = top_df_display['match_date'].dt.strftime('%B %d, %Y')
@@ -595,14 +648,19 @@ with tab2:
             date = row['match_date']
             home = row['home_team']
             away = row['away_team']
+            pred_h = row['pred_h_score']
+            pred_a = row['pred_a_score']
             
-            # Predict the winner string purely for display
-            if row['home_win_prob'] > row['away_win_prob'] and row['home_win_prob'] > row['draw_prob']:
-                pred = f"{home} Win"
-            elif row['away_win_prob'] > row['home_win_prob'] and row['away_win_prob'] > row['draw_prob']:
-                pred = f"{away} Win"
+            # Formatted predicted string
+            if pd.notna(pred_h) and pd.notna(pred_a):
+                pred = f"{int(pred_h)}-{int(pred_a)}"
             else:
-                pred = "Draw"
+                if row['home_win_prob'] > row['away_win_prob'] and row['home_win_prob'] > row['draw_prob']:
+                    pred = f"{home} Win"
+                elif row['away_win_prob'] > row['home_win_prob'] and row['away_win_prob'] > row['draw_prob']:
+                    pred = f"{away} Win"
+                else:
+                    pred = "Draw"
                 
             h_prob = row['Home Win %']
             a_prob = row['Away Win %']

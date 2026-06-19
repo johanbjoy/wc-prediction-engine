@@ -142,7 +142,10 @@ def _save_prediction(fixture_id: int, model_name: str, home: int, away: int, met
                 """
                 INSERT INTO predictions (fixture_id, model_name, predicted_home_score, predicted_away_score, meta_json) 
                 VALUES (%s,%s,%s,%s,%s)
-                ON CONFLICT (fixture_id, model_name) DO UPDATE SET meta_json = EXCLUDED.meta_json
+                ON CONFLICT (fixture_id, model_name) DO UPDATE SET 
+                    predicted_home_score = EXCLUDED.predicted_home_score,
+                    predicted_away_score = EXCLUDED.predicted_away_score,
+                    meta_json = EXCLUDED.meta_json
                 """,
                 (fixture_id, model_name, home, away, meta_json)
             )

@@ -127,7 +127,7 @@ def predict(home_team: str, away_team: str, tournament: str, current_date: str, 
                 "nexus_away_xg": float(pred_away),
                 "dixon_coles_probs": dc_probs,
                 "env_context": {"rest_home": rest_home, "rest_away": rest_away},
-                "model_used": "pytorch_transformer"
+                "model_used": "nexus_v3_primary"
             }
         except Exception as e:
             print(f"Transformer fallback: {e}")
@@ -143,29 +143,29 @@ def predict(home_team: str, away_team: str, tournament: str, current_date: str, 
     pred_home = max(0.0, float(model_home.predict(features)[0]))
     pred_away = max(0.0, float(model_away.predict(features)[0]))
     
-        # Phase 7: Apply Dynamic Adaptive Momentum
-        from data.database import get_team_momentum
-        h_mom = get_team_momentum(home_team)
-        a_mom = get_team_momentum(away_team)
-        
-        # Apply momentum to xG
-        pred_home *= h_mom
-        pred_away *= a_mom
-        
-        # Adjust probabilities slightly based on new xG (rough approximation)
-        dc_probs["p_home_win"] *= (h_mom / ((h_mom + a_mom)/2))
-        dc_probs["p_away_win"] *= (a_mom / ((h_mom + a_mom)/2))
-        
-        # Normalize
-        total = dc_probs["p_home_win"] + dc_probs["p_draw"] + dc_probs["p_away_win"]
-        dc_probs["p_home_win"] /= total
-        dc_probs["p_draw"] /= total
-        dc_probs["p_away_win"] /= total
-        
-        return {
-            "nexus_home_xg": float(pred_home),
-            "nexus_away_xg": float(pred_away),
-            "dixon_coles_probs": dc_probs,
-            "env_context": {"rest_home": rest_home, "rest_away": rest_away},
-            "model_used": "catboost_v2"
-        }
+    # Phase 7: Apply Dynamic Adaptive Momentum
+    from data.database import get_team_momentum
+    h_mom = get_team_momentum(home_team)
+    a_mom = get_team_momentum(away_team)
+    
+    # Apply momentum to xG
+    pred_home *= h_mom
+    pred_away *= a_mom
+    
+    # Adjust probabilities slightly based on new xG (rough approximation)
+    dc_probs["p_home_win"] *= (h_mom / ((h_mom + a_mom)/2))
+    dc_probs["p_away_win"] *= (a_mom / ((h_mom + a_mom)/2))
+    
+    # Normalize
+    total = dc_probs["p_home_win"] + dc_probs["p_draw"] + dc_probs["p_away_win"]
+    dc_probs["p_home_win"] /= total
+    dc_probs["p_draw"] /= total
+    dc_probs["p_away_win"] /= total
+    
+    return {
+        "nexus_home_xg": float(pred_home),
+        "nexus_away_xg": float(pred_away),
+        "dixon_coles_probs": dc_probs,
+        "env_context": {"rest_home": rest_home, "rest_away": rest_away},
+        "model_used": "nexus_v3_fallback"
+    }
