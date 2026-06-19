@@ -28,11 +28,10 @@ load_dotenv()
 from data.database import get_connection
 from data.scraper import get_starting_xi, get_upcoming_fixtures
 
-from models.poisson_model import predict as run_poisson
-from models.xgboost_model import predict as run_xgboost
+from models.nexus_model import predict as run_nexus
 
 from agents.analyst import build_tactical_prompt, call_openrouter
-from agents.predictor import build_prediction_prompt, call_gemini, call_grok, parse_prediction_json
+from agents.predictor import build_prediction_prompt, call_gemini, call_grok, call_groq, parse_prediction_json
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -173,7 +172,7 @@ def run_pipeline(fixture_id=None):
         return None
 
     home_team, away_team, fid = fixture["home_team"], fixture["away_team"], fixture["id"]
-    model_tag = f"ensemble+{AGENT2_BACKEND}+deepseek-r1"
+    model_tag = f"nexus_v2+{AGENT2_BACKEND}+deepseek-r1"
     logger.info(f"▶ {home_team} vs {away_team} (fixture {fid})")
 
     existing = _prediction_exists(fid, model_tag)
@@ -193,103 +192,45 @@ def run_pipeline(fixture_id=None):
     if match_date and match_date[:10] >= "2026-06-28":
         is_knockout = True
 
-    # --- ENSEMBLE EXECUTION ---
-
-    try:
-        poisson_result = run_poisson(home_team, away_team, home_players, away_players, is_knockout=is_knockout)
-    except Exception as e:
-        logger.error(f"Poisson model failed: {e}")
-        poisson_result = None
-
-    try:
-        xgb_result = run_xgboost(home_team, away_team, home_players, away_players)
-    except Exception as e:
-        logger.error(f"XGBoost model failed: {e}")
-        xgb_result = None
-
-    if not poisson_result and not xgb_result:
-        logger.error("Both models failed. Aborting prediction.")
-        return None
-
-    # Handle fallbacks
-    if poisson_result and not xgb_result:
-        logger.warning("Falling back to 100% Poisson.")
-        p_xg_home = poisson_result["model_meta"]["lam_home"]
-        p_xg_away = poisson_result["model_meta"]["lam_away"]
-        x_xg_home = p_xg_home
-        x_xg_away = p_xg_away
-    elif xgb_result and not poisson_result:
-        logger.warning("Falling back to 100% XGBoost.")
-        x_xg_home = xgb_result["model_meta"]["raw_home_xg"]
-        x_xg_away = xgb_result["model_meta"]["raw_away_xg"]
-        p_xg_home = x_xg_home
-        p_xg_away = x_xg_away
-    else:
-        p_xg_home = poisson_result["model_meta"]["lam_home"]
-        p_xg_away = poisson_result["model_meta"]["lam_away"]
-        x_xg_home = xgb_result["model_meta"]["raw_home_xg"]
-        x_xg_away = xgb_result["model_meta"]["raw_away_xg"]
-
-    # Shifted to dynamic weighting based on actual model performance
-    weights = get_dynamic_weights()
-    XGB_WEIGHT = weights["xgboost"]
-    POISSON_WEIGHT = weights["poisson"]
-    
-    logger.info(f"  Dynamic Weights Appied: XGBoost ({XGB_WEIGHT}) | Poisson ({POISSON_WEIGHT})")
-
-    blended_home_xg = (p_xg_home * POISSON_WEIGHT) + (x_xg_home * XGB_WEIGHT)
-    blended_away_xg = (p_xg_away * POISSON_WEIGHT) + (x_xg_away * XGB_WEIGHT)
-
-    # Apply Elo Differential Boost (Backtested: 1.5x optimal across 24 matches)
+    # --- N.E.X.U.S. V2 EXECUTION ---
     from data.scraper import TEAM_BASELINES
     hb = TEAM_BASELINES.get(home_team, TEAM_BASELINES["Default"])
     ab = TEAM_BASELINES.get(away_team, TEAM_BASELINES["Default"])
-    elo_diff = (hb.get("elo", 1800) - ab.get("elo", 1800)) / 100.0
+    elo_home = hb.get("elo", 1800)
+    elo_away = ab.get("elo", 1800)
     
-    # Apply live tournament form modifier from wcup2026.org free API
-    # Dampens Elo boost for underperforming favorites, boosts overperformers
     from data.tournament_form import get_tournament_form
-    home_form = get_tournament_form(home_team)
-    away_form = get_tournament_form(away_team)
-    
-    home_form_mod = home_form["form_modifier"]
-    away_form_mod = away_form["form_modifier"]
-    
-    if home_form["played"] > 0 or away_form["played"] > 0:
-        logger.info(f"  Tournament Form: {home_team} ({home_form_mod}) | {away_team} ({away_form_mod})")
-    
-    ELO_BOOST_MULT = 1.5  # Backtested optimal: stronger Elo signal improves exact scores
-    if elo_diff > 0:
-        # Home team is the Elo favorite — scale boost by home team's form
-        blended_home_xg += elo_diff * ELO_BOOST_MULT * home_form_mod
-    else:
-        # Away team is the Elo favorite — scale boost by away team's form
-        blended_away_xg += abs(elo_diff) * ELO_BOOST_MULT * away_form_mod
+    home_form = get_tournament_form(home_team)["form_modifier"]
+    away_form = get_tournament_form(away_team)["form_modifier"]
 
-    # Estimate base probabilities for Agent 2 and Value Engine
-    import numpy as np
-    xg_diff = blended_home_xg - blended_away_xg
-    p_home = 1.0 / (1.0 + np.exp(-0.8 * xg_diff)) * 100
-    p_away = (1.0 - p_home / 100.0) * 0.72 * 100
-    p_draw = 100.0 - p_home - p_away
+    try:
+        nex_out = run_nexus(home_team, away_team, "World Cup", match_date, elo_home, elo_away, home_form, away_form)
+    except Exception as e:
+        logger.error(f"N.E.X.U.S. model failed: {e}")
+        return None
 
-    # Normalize
-    total = p_home + p_draw + p_away
-    p_home = round(p_home / total * 100, 1)
-    p_draw = round(p_draw / total * 100, 1)
-    p_away = round(100.0 - p_home - p_draw, 1)
+    if not nex_out:
+        logger.error("N.E.X.U.S. returned empty prediction.")
+        return None
 
-    # Pack into initial schema
+    blended_home_xg = nex_out["nexus_home_xg"]
+    blended_away_xg = nex_out["nexus_away_xg"]
+    dc_probs = nex_out["dixon_coles_probs"]
+    
+    p_home = dc_probs["p_home_win"]
+    p_draw = dc_probs["p_draw"]
+    p_away = dc_probs["p_away_win"]
+
     final_pred = {
         "home_score": 0, "away_score": 0, "predicted_winner": "",
         "model_meta": {
-            "model": "ensemble_50_50",
-            "poisson_xg": {"home": round(p_xg_home, 3), "away": round(p_xg_away, 3)},
-            "xgb_xg": {"home": round(x_xg_home, 3), "away": round(x_xg_away, 3)},
+            "model": "nexus_v2",
             "blended_xg": {"home": round(blended_home_xg, 3), "away": round(blended_away_xg, 3)},
             "lam_home": round(blended_home_xg, 3),
             "lam_away": round(blended_away_xg, 3),
-            "p_home_win": p_home, "p_draw": p_draw, "p_away_win": p_away
+            "p_home_win": p_home, "p_draw": p_draw, "p_away_win": p_away,
+            "rest_home": nex_out["env_context"]["rest_home"],
+            "rest_away": nex_out["env_context"]["rest_away"]
         }
     }
 
@@ -312,7 +253,12 @@ def run_pipeline(fixture_id=None):
     llm_modifiers = None
     if AGENT2_BACKEND != "poisson":
         prompt = build_prediction_prompt(home_team, away_team, home_players, away_players, tactical_preview, final_pred)
-        raw = call_gemini(prompt) if AGENT2_BACKEND == "gemini" else call_grok(prompt)
+        if AGENT2_BACKEND == "groq":
+            raw = call_groq(prompt)
+        elif AGENT2_BACKEND == "grok":
+            raw = call_grok(prompt)
+        else:
+            raw = call_gemini(prompt)
         llm_modifiers = parse_prediction_json(raw)
         logger.info(f"  Agent 2 ({AGENT2_BACKEND}) Modifiers: {llm_modifiers}")
 
@@ -321,10 +267,10 @@ def run_pipeline(fixture_id=None):
         blended_home_xg *= llm_modifiers.get("home_attack_mod", 1.0) * llm_modifiers.get("away_defense_mod", 1.0)
         blended_away_xg *= llm_modifiers.get("away_attack_mod", 1.0) * llm_modifiers.get("home_defense_mod", 1.0)
 
-    # Conservative rounding bias: -0.10 rounds down borderline xG, better matching real WC scorelines
+    import math
     ROUND_BIAS = -0.10  # Backtested: avoids over-predicting goals in tight matches
-    home_score = max(0, int(np.floor(blended_home_xg + 0.5 + ROUND_BIAS)))
-    away_score = max(0, int(np.floor(blended_away_xg + 0.5 + ROUND_BIAS)))
+    home_score = max(0, int(math.floor(blended_home_xg + 0.5 + ROUND_BIAS)))
+    away_score = max(0, int(math.floor(blended_away_xg + 0.5 + ROUND_BIAS)))
 
     if home_score > away_score:
         predicted_winner = home_team
@@ -346,19 +292,6 @@ def run_pipeline(fixture_id=None):
     import json
     _save_prediction(fid, model_tag, final_pred["home_score"], final_pred["away_score"], json.dumps(meta))
     logger.info(f"  ✓ Saved: {home_team} {final_pred['home_score']}-{final_pred['away_score']} {away_team} [{model_tag}]")
-
-    # Save individual model predictions for dynamic weight grading
-    if xgb_result:
-        xgb_h = max(0, int(round(x_xg_home)))
-        xgb_a = max(0, int(round(x_xg_away)))
-        _save_prediction(fid, "xgboost", xgb_h, xgb_a)
-        logger.info(f"  ✓ Saved individual: {home_team} {xgb_h}-{xgb_a} {away_team} [xgboost]")
-
-    if poisson_result:
-        poi_h = max(0, int(round(p_xg_home)))
-        poi_a = max(0, int(round(p_xg_away)))
-        _save_prediction(fid, "poisson", poi_h, poi_a)
-        logger.info(f"  ✓ Saved individual: {home_team} {poi_h}-{poi_a} {away_team} [poisson]")
 
     return {"fixture_id": fid, "home_team": home_team, "away_team": away_team, "prediction": final_pred, "poisson_meta": meta, "model_name": model_tag}
 

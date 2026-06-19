@@ -8,8 +8,10 @@ logger = logging.getLogger(__name__)
 
 GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")
 GROK_KEY = os.getenv("GROK_API_KEY", "")
+GROQ_KEY = os.getenv("GROQ_API_KEY", "")
 GEMINI_MODEL = "gemini-2.5-flash"
 GROK_MODEL = "grok-2-latest"
+GROQ_MODEL = "llama3-8b-8192"
 
 def _validated_mods(mods: dict, fallback: dict) -> dict:
     valid = {}
@@ -85,4 +87,18 @@ def call_grok(prompt: str) -> str | None:
         return r.json()["choices"][0]["message"]["content"]
     except Exception as e:
         logger.error(f"Grok call failed: {e}")
+        return None
+
+def call_groq(prompt: str) -> str | None:
+    if not GROQ_KEY:
+        logger.warning("GROQ_API_KEY not set — Agent 2 LLM skipped.")
+        return None
+    try:
+        r = requests.post("https://api.groq.com/openai/v1/chat/completions", headers={
+            "Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json",
+        }, json={"model": GROQ_MODEL, "messages": [{"role": "user", "content": prompt}]}, timeout=30)
+        r.raise_for_status()
+        return r.json()["choices"][0]["message"]["content"]
+    except Exception as e:
+        logger.error(f"Groq call failed: {e}")
         return None

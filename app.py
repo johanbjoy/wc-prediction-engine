@@ -399,6 +399,13 @@ def _build_card(p: dict) -> str:
     p_home = meta.get('p_home_win', 0)
     p_draw = meta.get('p_draw', 0)
     p_away = meta.get('p_away_win', 0)
+    
+    # N.E.X.U.S. V2 Fallback: Probs are nested in poisson_probs
+    if 'poisson_probs' in meta:
+        p_home = meta['poisson_probs'].get('p_home_win', p_home)
+        p_draw = meta['poisson_probs'].get('p_draw', p_draw)
+        p_away = meta['poisson_probs'].get('p_away_win', p_away)
+
     blended = meta.get('blended_xg', {})
     xg_home = blended.get('home', 0)
     xg_away = blended.get('away', 0)
