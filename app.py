@@ -41,6 +41,24 @@ st.markdown("""
     color: #e2e8f0;
     font-family: 'Inter', sans-serif;
 }
+.header-text {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 5rem !important;
+    letter-spacing: -2px;
+    background: linear-gradient(to bottom right, #ffffff, #94a3b8, #475569);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    margin-bottom: 0px;
+    margin-top: 20px;
+    animation: fadeInDown 1s ease-out;
+    filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
+}
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 .subheader-text {
     font-family: 'Outfit', sans-serif;
     color: #cbd5e1;
@@ -115,9 +133,7 @@ div[data-testid="stMetricValue"] {
 # ============================================
 # HEADER SECTION
 # ============================================
-col1, col2, col3 = st.columns([1,2,1])
-with col2:
-    st.image("nexus_logo.png", use_column_width=True)
+st.markdown('<div class="header-text" style="font-size: 5rem; letter-spacing: -2px; margin-top: 20px;">N.E.X.U.S.</div>', unsafe_allow_html=True)
 st.markdown('<div class="subheader-text">AI-Powered Football Prediction Engine | CatBoost + Transformer Hybrid</div>', unsafe_allow_html=True)
 
 
@@ -251,39 +267,10 @@ def load_worldcup_data():
 
 df = load_worldcup_data()
 
-# ============================================
-# SIDEBAR CONTROLS
-# ============================================
-with st.sidebar:
-    st.header("🎛️ Dashboard Controls")
-    
-    # Tournament filter
-    tournament = st.selectbox(
-        "🏆 Tournament",
-        ["World Cup 2026", "Qualifiers", "All Tournaments"]
-    )
-    
-    # Phase filter
-    phase = st.selectbox(
-        "📅 Match Phase",
-        ["All Phases", "Group Stage", "Qualifiers"]
-    )
-    
-    # Accuracy threshold
-    min_accuracy = st.slider(
-        "🎯 Minimum Confidence Display",
-        0.0, 1.0, 0.40
-    )
-    
-    st.markdown("---")
-    st.info("🔄 Auto-refreshes every 30 minutes via CRON")
-
-
 # Filter data
 if len(df) > 0:
-    # Get max prob for each row to filter by confidence
-    max_probs = df[['home_win_prob', 'draw_prob', 'away_win_prob']].max(axis=1)
-    filtered_df = df[max_probs >= min_accuracy]
+    # Remove confidence filter since sidebar is removed. Show all.
+    filtered_df = df
 else:
     filtered_df = df
 
@@ -381,9 +368,9 @@ with tab1:
         ))
         fig_accuracy.add_trace(go.Scatter(
             x=historical_df_sorted['match_date'],
-            y=[0.536] * len(historical_df_sorted),
+            y=[0.65] * len(historical_df_sorted),
             mode='lines',
-            name='V2 Base (53.6%)',
+            name='V3 Base (65.0%)',
             line=dict(color=WC2026_COLORS['green'], width=2, dash='dash')
         ))
         fig_accuracy.update_layout(
