@@ -27,11 +27,9 @@ load_dotenv()
 
 from data.database import get_connection
 from data.scraper import get_starting_xi, get_upcoming_fixtures
-from data.odds_blender import get_blended_probabilities
 
 from models.poisson_model import predict as run_poisson
 from models.xgboost_model import predict as run_xgboost
-from models.value_engine import calculate_edge
 
 from agents.analyst import build_tactical_prompt, call_openrouter
 from agents.predictor import build_prediction_prompt, call_gemini, call_grok, parse_prediction_json
@@ -295,16 +293,7 @@ def run_pipeline(fixture_id=None):
         }
     }
 
-    # Blending with market consensus
-    blended_probs = get_blended_probabilities(
-        home_team, away_team, 
-        final_pred["model_meta"]
-    )
-    final_pred["model_meta"].update({
-        "p_home_win": blended_probs["p_home_win"],
-        "p_draw": blended_probs["p_draw"],
-        "p_away_win": blended_probs["p_away_win"]
-    })
+    # Removed market consensus blending
 
     cache_key = f"tactical_{fid}"
     tactical_preview = _cache_get(cache_key)
@@ -350,9 +339,7 @@ def run_pipeline(fixture_id=None):
 
     meta = final_pred["model_meta"]
     
-    # Value Engine Edge Calculation
-    edge_calc = calculate_edge(meta['p_home_win'], blended_probs['p_home_win'])
-    logger.info(f"  Value Engine: EV {edge_calc['ev']} | Kelly {edge_calc['kelly_pct']}% | Edge {edge_calc['edge']}%")
+    # Removed value engine EV calculation
     
     logger.info(f"  Final Ensemble → {home_team} {final_pred['home_score']}-{final_pred['away_score']} {away_team}  ({meta['p_home_win']}% / {meta['p_draw']}% / {meta['p_away_win']}%)")
 

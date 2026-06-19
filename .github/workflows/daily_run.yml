@@ -21,5 +21,4 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: python3 orchestrator.py
