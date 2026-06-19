@@ -311,6 +311,23 @@ body {
 # ============================================
 # HEADER SECTION
 # ============================================
+def get_flag(team):
+    flags = {
+        "Mexico": "🇲🇽", "Canada": "🇨🇦", "USA": "🇺🇸", "Brazil": "🇧🇷", "Argentina": "🇦🇷",
+        "France": "🇫🇷", "Germany": "🇩🇪", "Spain": "🇪🇸", "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "Portugal": "🇵🇹",
+        "Italy": "🇮🇹", "Netherlands": "🇳🇱", "Belgium": "🇧🇪", "Croatia": "🇭🇷", "Uruguay": "🇺🇾",
+        "Colombia": "🇨🇴", "Japan": "🇯🇵", "South Korea": "🇰🇷", "Senegal": "🇸🇳", "Morocco": "🇲🇦",
+        "Switzerland": "🇨🇭", "Ecuador": "🇪🇨", "Ghana": "🇬🇭", "Cameroon": "🇨🇲", "Iran": "🇮🇷",
+        "Saudi Arabia": "🇸🇦", "Australia": "🇦🇺", "Tunisia": "🇹🇳", "Wales": "🏴󠁧󠁢󠁷󠁬󠁳󠁿", "Poland": "🇵🇱",
+        "Serbia": "🇷🇸", "Denmark": "🇩🇰", "Costa Rica": "🇨🇷", "Sweden": "🇸🇪", "Peru": "🇵🇪",
+        "Chile": "🇨🇱", "Nigeria": "🇳🇬", "Egypt": "🇪🇬", "Ivory Coast": "🇨🇮", "Algeria": "🇩🇿",
+        "DR Congo": "🇨🇩", "South Africa": "🇿🇦", "Mali": "🇲🇱", "Bosnia & Herzegovina": "🇧🇦",
+        "Czech Republic": "🇨🇿", "Norway": "🇳🇴", "Qatar": "🇶🇦", "Uzbekistan": "🇺🇿",
+        "Jordan": "🇯🇴", "New Zealand": "🇳🇿", "Panama": "🇵🇦", "Cape Verde": "🇨🇻", "Curaçao": "🇨🇼",
+        "Jamaica": "🇯🇲", "Honduras": "🇭🇳", "El Salvador": "🇸🇻", "Iraq": "🇮🇶"
+    }
+    return flags.get(team, "🏳️")
+
 st.markdown('<div class="header-text" style="font-size: 5rem; letter-spacing: -2px; margin-top: 20px;">N.E.X.U.S.</div>', unsafe_allow_html=True)
 st.markdown('<div class="subheader-text">AI-Powered Football Prediction Engine | CatBoost + Transformer Hybrid</div>', unsafe_allow_html=True)
 
@@ -402,9 +419,9 @@ def load_worldcup_data():
             
         # Try to parse match date
         try:
-            m_date = pd.to_datetime(row.get("match_date", "").split(" ")[0])
+            m_date = pd.to_datetime(row.get("match_date", ""))
         except:
-            m_date = pd.to_datetime("2026-06-01")
+            m_date = pd.to_datetime("2026-06-01 15:00:00")
             
         is_upcoming = actual_out is None
         
@@ -524,9 +541,9 @@ if len(filtered_df) == 0:
     st.stop()
 
 # ============================================
-# TABS: HISTORY, PREDICTIONS, UPCOMING, SIMULATION
+# TABS: HISTORY AND SIMULATION
 # ============================================
-tab1, tab2, tab3, tab4 = st.tabs(["📜 Prediction History", "🎯 Latest Predictions", "📅 Upcoming Matches", "🏆 Projected Bracket"])
+tab1, tab2 = st.tabs(["📜 Prediction History", "🏆 Projected Bracket"])
 
 # ============================================
 # TAB 1: PREDICTION HISTORY
@@ -537,38 +554,6 @@ with tab1:
     # Filter historical matches only
     historical_df = filtered_df[~filtered_df['is_upcoming']]
     
-    # Accuracy over time chart
-    st.markdown("### 📈 Confidence Trend (Last 30 Matches)")
-    
-    if len(historical_df) > 0:
-        historical_df_sorted = historical_df.sort_values('match_date').tail(30)
-        
-        fig_accuracy = go.Figure()
-        fig_accuracy.add_trace(go.Scatter(
-            x=historical_df_sorted['match_date'],
-            y=historical_df_sorted['model_accuracy'],
-            mode='lines+markers',
-            name='Confidence of Correct Call',
-            line=dict(color=WC2026_COLORS['primary'], width=3),
-            marker=dict(size=8)
-        ))
-        fig_accuracy.add_trace(go.Scatter(
-            x=historical_df_sorted['match_date'],
-            y=[0.65] * len(historical_df_sorted),
-            mode='lines',
-            name='V3 Base (65.0%)',
-            line=dict(color=WC2026_COLORS['green'], width=2, dash='dash')
-        ))
-        fig_accuracy.update_layout(
-            title='Prediction Confidence Over Time',
-            xaxis_title='Match Date',
-            yaxis_title='Confidence Probability',
-            yaxis=dict(range=[0.0, 1.0]),
-            height=400,
-            template='plotly_dark' # Changed to dark to match theme
-        )
-        st.plotly_chart(fig_accuracy, use_container_width=True)
-    
     st.markdown("### 📊 Detailed Match History")
     
     if len(historical_df) > 0:
@@ -577,7 +562,8 @@ with tab1:
                        'actual_score', 'pred_h_score', 'pred_a_score', 'model_accuracy']
         
         history_df_display = historical_df[history_cols].copy()
-        history_df_display['match_date'] = history_df_display['match_date'].dt.strftime('%B %d, %Y')
+        # Format date WITH TIME
+        history_df_display['match_date'] = history_df_display['match_date'].dt.strftime('%B %d, %Y at %H:%M UTC')
         
         cards_html = "<div>"
         for _, row in history_df_display.iterrows():
@@ -590,6 +576,10 @@ with tab1:
             pred_h = row['pred_h_score']
             pred_a = row['pred_a_score']
             acc = row['model_accuracy']
+            
+            # Flags
+            home_flag = get_flag(home)
+            away_flag = get_flag(away)
             
             # Formatted predicted string
             if pd.notna(pred_h) and pd.notna(pred_a):
@@ -607,137 +597,23 @@ with tab1:
                 
             cards_html += f"""
 <div class="score-card">
-    <div class="score-team score-home">{home}</div>
+    <div class="score-team score-home">{home_flag} {home}</div>
     <div class="score-center">
         <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 5px;">{date}</div>
         <div class="score-actual">{act_score_str}</div>
         <div class="predicted-sub">{pred_str}</div>
         {badge}
     </div>
-    <div class="score-team score-away">{away}</div>
+    <div class="score-team score-away">{away} {away_flag}</div>
 </div>
 """
         cards_html += "</div>"
         st.markdown(cards_html, unsafe_allow_html=True)
 
 # ============================================
-# TAB 2: LATEST PREDICTIONS
+# TAB 2: SIMULATION BRACKET
 # ============================================
 with tab2:
-    st.subheader("🎯 Latest Model Predictions")
-    
-    # Sort by confidence (highest probability)
-    latest_df = filtered_df.sort_values('home_win_prob', ascending=False).head(20)
-    
-    if len(latest_df) > 0:
-        # Top predictions table
-        st.markdown("### 🔥 Top Confidence Predictions")
-        
-        top_cols = ['match_date', 'home_team', 'away_team', 'stage',
-                   'home_win_prob', 'draw_prob', 'away_win_prob',
-                   'pred_h_score', 'pred_a_score']
-        
-        top_df_display = latest_df[top_cols].copy()
-        top_df_display['match_date'] = top_df_display['match_date'].dt.strftime('%B %d, %Y')
-        top_df_display['Home Win %'] = top_df_display['home_win_prob'].apply(lambda x: f'{x:.1%}')
-        top_df_display['Draw %'] = top_df_display['draw_prob'].apply(lambda x: f'{x:.1%}')
-        top_df_display['Away Win %'] = top_df_display['away_win_prob'].apply(lambda x: f'{x:.1%}')
-        
-        cards_html = "<div>"
-        for _, row in top_df_display.iterrows():
-            date = row['match_date']
-            home = row['home_team']
-            away = row['away_team']
-            pred_h = row['pred_h_score']
-            pred_a = row['pred_a_score']
-            
-            # Formatted predicted string
-            if pd.notna(pred_h) and pd.notna(pred_a):
-                pred = f"{int(pred_h)}-{int(pred_a)}"
-            else:
-                if row['home_win_prob'] > row['away_win_prob'] and row['home_win_prob'] > row['draw_prob']:
-                    pred = f"{home} Win"
-                elif row['away_win_prob'] > row['home_win_prob'] and row['away_win_prob'] > row['draw_prob']:
-                    pred = f"{away} Win"
-                else:
-                    pred = "Draw"
-                
-            h_prob = row['Home Win %']
-            a_prob = row['Away Win %']
-            
-            cards_html += f"""
-<div class="score-card" style="border-color: rgba(59, 130, 246, 0.3);">
-    <div class="score-team score-home">{home} <br><span style="font-size: 0.8rem; color: #10b981;">{h_prob}</span></div>
-    <div class="score-center">
-        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 5px;">{date}</div>
-        <div class="score-actual" style="font-size: 1.2rem; color: #3b82f6;">{pred}</div>
-        <div class="predicted-sub">Highest Confidence Prediction</div>
-    </div>
-    <div class="score-team score-away">{away} <br><span style="font-size: 0.8rem; color: #f59e0b;">{a_prob}</span></div>
-</div>
-"""
-        cards_html += "</div>"
-        st.markdown(cards_html, unsafe_allow_html=True)
-
-# ============================================
-# TAB 3: UPCOMING MATCHES
-# ============================================
-with tab3:
-    st.subheader("📅 Upcoming World Cup Matches")
-    
-    # Filter upcoming matches
-    upcoming_df = filtered_df[filtered_df['is_upcoming']].sort_values('match_date')
-    
-    if len(upcoming_df) == 0:
-        st.warning("No upcoming matches currently loaded in the database.")
-    else:
-        # Next 5 matches carousel
-        st.markdown("### ⚡ Next Matches")
-        
-        for i, row in upcoming_df.head(5).iterrows():
-            with st.container():
-                st.markdown(f"""
-                <div class="match-card">
-                    <h3 style="color: {WC2026_COLORS['secondary']}; margin: 0;">
-                        {row['home_team']} vs {row['away_team']}
-                    </h3>
-                    <p style="color: {WC2026_COLORS['primary']}; margin: 5px 0;">
-                        📅 {row['match_date'].strftime('%B %d, %Y')} | 🏆 {row['stage']}
-                    </p>
-                    <p style="margin: 10px 0;">
-                        <strong>🎯 Phase 5 Prediction:</strong> 
-                        {row['home_team']} ({row['home_win_prob']:.1%}) | 
-                        Draw ({row['draw_prob']:.1%}) | 
-                        {row['away_team']} ({row['away_win_prob']:.1%})
-                    </p>
-                    <p style="margin: 5px 0;">
-                        <strong>📊 Projected xG:</strong> {row['home_xg']:.2f} - {row['away_xg']:.2f}
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-        
-        # Full upcoming matches table
-        st.markdown("### 📋 All Upcoming Matches")
-        
-        upcoming_cols = ['match_date', 'home_team', 'away_team', 'stage',
-                        'home_win_prob', 'draw_prob', 'away_win_prob']
-        
-        upcoming_df_display = upcoming_df[upcoming_cols].copy()
-        upcoming_df_display['match_date'] = upcoming_df_display['match_date'].dt.strftime('%B %d, %Y')
-        upcoming_df_display['Home Win %'] = upcoming_df_display['home_win_prob'].apply(lambda x: f'{x:.1%}')
-        upcoming_df_display['Draw %'] = upcoming_df_display['draw_prob'].apply(lambda x: f'{x:.1%}')
-        upcoming_df_display['Away Win %'] = upcoming_df_display['away_win_prob'].apply(lambda x: f'{x:.1%}')
-        
-        st.dataframe(
-            upcoming_df_display,
-            use_container_width=True,
-            hide_index=True
-        )
-
-# ============================================
-# TAB 4: SIMULATION BRACKET
-# ============================================
-with tab4:
     st.subheader("🏆 N.E.X.U.S. V3 Simulated Tournament Bracket")
     st.markdown("This tab displays a full 100% autonomous simulation of the 2026 World Cup from the projected 48 qualified teams down to the final champion, predicted by the **PyTorch Transformer**.")
     
@@ -748,10 +624,11 @@ with tab4:
             bracket_data = json.load(f)
             
         champ = bracket_data.get("champion", "TBD")
+        champ_flag = get_flag(champ)
         st.markdown(f"""
         <div class="champ-card" style="padding: 30px; border-radius: 20px; text-align: center; margin: 20px 0;">
             <h2 style="color: #f59e0b; margin-bottom: 5px; font-family: 'Inter';">WORLD CHAMPION 2026</h2>
-            <h1 style="color: #f8fafc; font-size: 3.5rem; margin: 0; text-transform: uppercase; font-family: 'Outfit';">🏆 {champ} 🏆</h1>
+            <h1 style="color: #f8fafc; font-size: 3.5rem; margin: 0; text-transform: uppercase; font-family: 'Outfit';">{champ_flag} 🏆 {champ} 🏆 {champ_flag}</h1>
         </div>
         """, unsafe_allow_html=True)
         
@@ -777,6 +654,9 @@ with tab4:
                 _as = match['away_score']
                 winner = match['winner']
                 
+                home_flag = get_flag(home)
+                away_flag = get_flag(away)
+                
                 home_color = "#10b981" if winner == home else "#64748b"
                 away_color = "#10b981" if winner == away else "#64748b"
                 
@@ -786,11 +666,11 @@ with tab4:
 <div class="bracket-node" style="animation-delay: {delay}s; background: rgba(15,15,15,0.8); border: 1px solid #262626; border-radius: 10px; padding: 12px; position: relative; overflow: hidden;">
     <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: {'#10b981' if hs > _as else '#3b82f6'};"></div>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-weight: bold; color: {home_color}; font-family: 'Inter';">{home}</span>
+        <span style="font-weight: bold; color: {home_color}; font-family: 'Inter';">{home_flag} {home}</span>
         <span style="font-weight: 900; font-size: 1.2rem; color: #f8fafc; font-family: 'Outfit';">{hs}</span>
     </div>
     <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-weight: bold; color: {away_color}; font-family: 'Inter';">{away}</span>
+        <span style="font-weight: bold; color: {away_color}; font-family: 'Inter';">{away_flag} {away}</span>
         <span style="font-weight: 900; font-size: 1.2rem; color: #f8fafc; font-family: 'Outfit';">{_as}</span>
     </div>
     <div style="text-align: right; margin-top: 8px; font-size: 0.7rem; color: #475569;">
