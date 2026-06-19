@@ -30,7 +30,7 @@ from data.scraper import get_starting_xi, get_upcoming_fixtures
 
 from models.nexus_model import predict as run_nexus
 
-from agents.analyst import build_tactical_prompt, call_openrouter
+from agents.analyst import build_tactical_prompt, call_llm
 from agents.predictor import build_prediction_prompt, call_gemini, call_grok, call_groq, parse_prediction_json
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
