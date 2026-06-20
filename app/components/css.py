@@ -3,7 +3,7 @@ import streamlit as st
 def apply_command_center_css():
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;900&family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;700&display=swap');
 
     :root {
         --bg-primary: #0a0e1a;
@@ -18,8 +18,8 @@ def apply_command_center_css():
         --accent-green: #10b981;
         --accent-red: #ef4444;
         
-        --font-display: 'Orbitron', sans-serif;
-        --font-mono: 'JetBrains Mono', monospace;
+        --font-display: 'Montserrat', sans-serif;
+        --font-mono: 'Fira Code', monospace;
         --font-body: 'Inter', sans-serif;
     }
 
