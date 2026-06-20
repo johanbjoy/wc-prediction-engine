@@ -28,7 +28,7 @@ else:
             ist_dt = row['_sort_date'].tz_convert('Asia/Kolkata')
             st.markdown(f"""
             <div style="font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-secondary); margin-top: 20px;">
-                {str(row['match_date']).split(' ')[0]}<br>
+                {ist_dt.strftime('%A, %b %d')}<br>
                 <span style="color: var(--accent-cyan);">{ist_dt.strftime('%I:%M %p IST')}</span>
             </div>
             """, unsafe_allow_html=True)

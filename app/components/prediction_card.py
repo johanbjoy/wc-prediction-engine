@@ -3,8 +3,8 @@ import pandas as pd
 from .utils import get_flag
 
 def render_prediction_card(row):
-    ist_time = row['_sort_date'].tz_convert('Asia/Kolkata').strftime('%I:%M %p IST')
-    date = f"{str(row['match_date']).split(' ')[0]} • {ist_time}"
+    ist_dt = row['_sort_date'].tz_convert('Asia/Kolkata')
+    date = ist_dt.strftime('%b %d, %Y • %I:%M %p IST')
     home = row['home_team']
     away = row['away_team']
     pred_h = row['pred_h_score']
