@@ -3,8 +3,11 @@ import pandas as pd
 from .utils import get_flag
 
 def render_prediction_card(row):
-    ist_dt = row['_sort_date'].tz_convert('Asia/Kolkata')
-    date = ist_dt.strftime('%b %d, %Y • %I:%M %p IST')
+    try:
+        ist_dt = row['_sort_date'].tz_convert('Asia/Kolkata')
+        date = ist_dt.strftime('%b %d, %Y • %I:%M %p IST')
+    except Exception:
+        date = "Date TBD"
     home = row['home_team']
     away = row['away_team']
     pred_h = row['pred_h_score']

@@ -25,11 +25,18 @@ else:
         col1, col2, col3 = st.columns([1, 2, 1])
         
         with col1:
-            ist_dt = row['_sort_date'].tz_convert('Asia/Kolkata')
+            try:
+                ist_dt = row['_sort_date'].tz_convert('Asia/Kolkata')
+                date_str = ist_dt.strftime('%A, %b %d')
+                time_str = ist_dt.strftime('%I:%M %p IST')
+            except Exception:
+                date_str = "TBD"
+                time_str = "TBD"
+
             st.markdown(f"""
             <div style="font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-secondary); margin-top: 20px;">
-                {ist_dt.strftime('%A, %b %d')}<br>
-                <span style="color: var(--accent-cyan);">{ist_dt.strftime('%I:%M %p IST')}</span>
+                {date_str}<br>
+                <span style="color: var(--accent-cyan);">{time_str}</span>
             </div>
             """, unsafe_allow_html=True)
             
