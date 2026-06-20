@@ -20,11 +20,11 @@ def render_calibration_reliability():
         marker=dict(size=8)
     ))
 
-    # V3 CatBoost Raw
+    # V1 CatBoost Raw
     fig.add_trace(go.Scatter(
         x=[0.1, 0.3, 0.5, 0.7, 0.9], 
         y=[0.15, 0.25, 0.40, 0.80, 0.95], 
-        mode='lines+markers', name='V3 Baseline (Uncalibrated)',
+        mode='lines+markers', name='V1 Baseline (Uncalibrated)',
         line=dict(color='#ef4444', width=2, dash='dot'),
         marker=dict(size=6)
     ))

@@ -45,7 +45,7 @@ with col3:
     st.markdown('</div>', unsafe_allow_html=True)
 with col4:
     st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-    st.metric("Calibration (ECE)", "0.014", "-35% vs V3")
+    st.metric("Calibration (ECE)", "0.014", "-35% vs V1")
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("<br><br>", unsafe_allow_html=True)

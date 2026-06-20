@@ -122,7 +122,7 @@ class FeatureEngine:
         features["form_away_conceded_5"] = a_conceded
         features["form_diff"] = (h_scored - h_conceded) - (a_scored - a_conceded)
         
-        # 4. Poisson Baseline Integrations (Legacy V3 fusion)
+        # 4. Poisson Baseline Integrations (Legacy V1 fusion)
         try:
             from models.poisson_model import predict as poisson_predict
             from data.scraper import _baseline_squad

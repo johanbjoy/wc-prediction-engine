@@ -21,7 +21,7 @@ def run_backfill():
     finally:
         conn.close()
 
-    logger.info(f"Starting V3 Backfill for {len(fixtures)} completed fixtures...")
+    logger.info(f"Starting V1 Backfill for {len(fixtures)} completed fixtures...")
     
     # Reuse a single DB connection for all insertions and updates
     db_conn = get_connection()
@@ -36,7 +36,7 @@ def run_backfill():
                 home_elo = 1800
                 away_elo = 1800
                 
-                # Predict using V3 (which automatically falls back to Transformer)
+                # Predict using V1 (which automatically falls back to Transformer)
                 result = predict(home, away, "Qualifiers", f["match_date"], home_elo, away_elo, 1.0, 1.0)
                 
                 if not result:
