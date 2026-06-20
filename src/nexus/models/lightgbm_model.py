@@ -1,6 +1,6 @@
 """
 lightgbm_model.py — LightGBM with DART (Dropouts meet Multiple Additive Regression Trees)
-The primary tabular ML model for NEXUS V4, replacing CatBoost for superior accuracy and speed.
+The primary tabular ML model for NEXUS V2, replacing CatBoost for superior accuracy and speed.
 """
 import os
 import numpy as np

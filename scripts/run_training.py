@@ -9,10 +9,10 @@ from src.nexus.stacking.deep_stack import DeepStackingEnsemble
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────
 LOCAL_CSV = os.path.join(os.path.dirname(__file__), "..", "data_store", "databases", "results.csv")
-SAVE_DIR = os.path.join(os.path.dirname(__file__), "..", "data_store", "models", "v4")
+SAVE_DIR = os.path.join(os.path.dirname(__file__), "..", "data_store", "models", "v2")
 
-def train_nexus_v4():
-    print("--- N.E.X.U.S. V4 Sovereign Engine: Hierarchical Training ---")
+def train_nexus_v2():
+    print("--- N.E.X.U.S. V2 Sovereign Engine: Hierarchical Training ---")
     if not os.path.exists(LOCAL_CSV):
         print("Missing results.csv! Cannot train.")
         return
@@ -47,7 +47,7 @@ def train_nexus_v4():
     os.makedirs(SAVE_DIR, exist_ok=True)
     ensemble.save_models(SAVE_DIR)
     
-    print("NEXUS V4 training complete. Ready for dynamic routing.")
+    print("NEXUS V2 training complete. Ready for dynamic routing.")
 
 if __name__ == "__main__":
-    train_nexus_v4()
+    train_nexus_v2()

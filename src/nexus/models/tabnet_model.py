@@ -1,6 +1,6 @@
 """
 tabnet_model.py — Deep Learning for Tabular Data
-Implements attention-based deep learning (TabNet) for the NEXUS V4 Engine.
+Implements attention-based deep learning (TabNet) for the NEXUS V2 Engine.
 """
 import os
 import numpy as np

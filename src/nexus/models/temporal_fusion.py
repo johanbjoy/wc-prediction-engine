@@ -1,6 +1,6 @@
 """
 temporal_fusion.py — Temporal Fusion Transformer (TFT)
-Implements time-series forecasting for NEXUS V4 form tracking.
+Implements time-series forecasting for NEXUS V2 form tracking.
 """
 import os
 import numpy as np
