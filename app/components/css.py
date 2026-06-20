@@ -62,7 +62,7 @@ def apply_command_center_css():
     }
 
     /* Cards */
-    .metric-card {
+    [data-testid="stMetric"] {
         background-color: var(--bg-surface);
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 12px;
@@ -70,7 +70,7 @@ def apply_command_center_css():
         box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         transition: all 0.3s ease;
     }
-    .metric-card:hover {
+    [data-testid="stMetric"]:hover {
         border-color: var(--accent-cyan);
         transform: translateY(-3px);
         box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15);

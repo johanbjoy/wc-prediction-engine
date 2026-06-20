@@ -32,21 +32,13 @@ else:
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
     st.metric("Total Matches Evaluated", f"{total_matches}")
-    st.markdown('</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
     st.metric("Outcome Accuracy", f"{acc_pct:.1f}%", f"Target: 75%")
-    st.markdown('</div>', unsafe_allow_html=True)
 with col3:
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
     st.metric("Exact Score Accuracy", f"{exact_pct:.1f}%", f"Target: 22%")
-    st.markdown('</div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
     st.metric("Calibration (ECE)", "0.014", "-35% vs V1")
-    st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 
