@@ -4,10 +4,12 @@ Runs Phase 5 Stacked Meta-Learner logic using CatBoost, Dixon-Coles, and Environ
 """
 import os
 import pandas as pd
-from catboost import CatBoostRegressor
 from src.nexus.models.poisson_model import predict as get_poisson_baseline
 from src.nexus.models.dixon_coles import get_dixon_coles_probs
 from src.nexus.data.database import get_connection
+
+from src.nexus.stacking.deep_stack import DeepStackingEnsemble
+from src.nexus.features.feature_engine import FeatureEngine
 
 # Elite feature imports
 from src.nexus.data.weather import get_weather_factor
@@ -98,23 +100,30 @@ def predict(home_team: str, away_team: str, tournament: str, current_date: str, 
     }])
     
     # ============================================
-    # N.E.X.U.S. Engine: CatBoost Primary Optimizer
+    # N.E.X.U.S. V4 Engine: Deep Stacking Ensemble
     # ============================================
-    # Switching from PyTorch Transformer to CatBoost for superior tabular data handling.
-    global _CATBOOST_HOME, _CATBOOST_AWAY
-    if '_CATBOOST_HOME' not in globals():
+    global _DEEP_STACK
+    if '_DEEP_STACK' not in globals():
         try:
-            _CATBOOST_HOME = CatBoostRegressor().load_model(home_model_path)
-            _CATBOOST_AWAY = CatBoostRegressor().load_model(away_model_path)
+            model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data_store", "models", "v4"))
+            _DEEP_STACK = DeepStackingEnsemble().load_models(model_dir)
         except Exception as e:
-            print(f"Failed to load N.E.X.U.S CatBoost models: {e}")
+            print(f"Failed to load N.E.X.U.S V4 Deep Stack models: {e}")
             return {}
             
-    model_home = _CATBOOST_HOME
-    model_away = _CATBOOST_AWAY
-        
-    pred_home = max(0.0, float(model_home.predict(features)[0]))
-    pred_away = max(0.0, float(model_away.predict(features)[0]))
+    # Generate unified 80+ features
+    fe = FeatureEngine()
+    features = fe.generate_features(pd.DataFrame([{
+        "home_team": home_team, "away_team": away_team, "tournament": tournament, "neutral": 1
+    }]))
+    
+    stack_preds = _DEEP_STACK.predict(features, {})
+    pred_home = float(stack_preds['probabilities']['p_home_win'] * 3.0) # Pseudo-xG conversion for backward compatibility
+    pred_away = float(stack_preds['probabilities']['p_away_win'] * 3.0)
+    
+    if hasattr(_DEEP_STACK, 'lgb_home'):
+        pred_home = float(_DEEP_STACK.lgb_home.predict(features)[0])
+        pred_away = float(_DEEP_STACK.lgb_away.predict(features)[0])
     
     # Phase 7: Apply Dynamic Adaptive Momentum
     global _TEAM_MOMENTUM_CACHE
@@ -163,5 +172,5 @@ def predict(home_team: str, away_team: str, tournament: str, current_date: str, 
         "dixon_coles_probs": coupled_dc_probs,
         "blended_probs": blended_probs,
         "env_context": {"rest_home": rest_home, "rest_away": rest_away},
-        "model_used": "nexus_v3_advanced_blend"
+        "model_used": "nexus_v4_deep_stack"
     }
