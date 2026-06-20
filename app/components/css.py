@@ -144,5 +144,10 @@ def apply_command_center_css():
         font-family: var(--font-display);
         color: var(--text-primary);
     }
+    
+    /* Hide the redundant 'main.py' entry from the sidebar */
+    [data-testid="stSidebarNav"] ul li:first-child {
+        display: none;
+    }
     </style>
     """, unsafe_allow_html=True)
