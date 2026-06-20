@@ -5,7 +5,7 @@ if root_dir not in sys.path:
 
 import streamlit as st
 from app.components.css import apply_command_center_css
-from app.components.utils import load_worldcup_data
+from app.components.utils import load_worldcup_data_v2
 from app.components.calibration_chart import render_calibration_reliability
 
 st.set_page_config(page_title="NEXUS Dashboard", page_icon="⚡", layout="wide")
@@ -14,7 +14,7 @@ apply_command_center_css()
 st.markdown('<div class="header-text">N.E.X.U.S. V2</div>', unsafe_allow_html=True)
 st.markdown('<div class="subheader-text">Sovereign Intelligence Engine | Command Center</div>', unsafe_allow_html=True)
 
-df = load_worldcup_data()
+df = load_worldcup_data_v2()
 df_eval = df[~df['is_upcoming']]
 
 # Metrics

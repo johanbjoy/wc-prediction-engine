@@ -32,7 +32,7 @@ def get_flag(team):
     return flags.get(team, "🏳️")
 
 @st.cache_data(ttl=300)
-def load_worldcup_data():
+def load_worldcup_data_v2():
     comp = get_completed_predictions(limit=1000)
     upc = get_upcoming_predictions(limit=50)
     
