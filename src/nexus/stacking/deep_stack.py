@@ -56,6 +56,10 @@ class DeepStackingEnsemble:
             'temporal_fusion'
         ]
         
+        # Dynamic Router
+        from src.nexus.stacking.model_selector import DynamicModelSelector
+        self.model_selector = DynamicModelSelector()
+        
         # Level 2 Meta-Learners
         self.meta_home = StackingMetaLearner(task='home_win')
         self.meta_draw = StackingMetaLearner(task='draw')
@@ -66,8 +70,8 @@ class DeepStackingEnsemble:
         
     def should_include(self, model: str, context: dict) -> bool:
         """Dynamic router logic."""
-        # For phase 1, include all
-        return True
+        selected, _ = self.model_selector.select_models(context)
+        return model in selected
         
     def fit(self, X: pd.DataFrame, y_home: pd.Series, y_away: pd.Series):
         """Train all base models and meta learners."""
@@ -104,14 +108,16 @@ class DeepStackingEnsemble:
         """Execute the deep stack."""
         base_preds = {}
         
-        if hasattr(self, 'lgb_home'):
+        # Determine active models for this match context
+        active_models, weights = self.model_selector.select_models(match_context)
+        
+        # LightGBM Predictions
+        if 'lightgbm' in active_models and hasattr(self, 'lgb_home'):
             pred_h = self.lgb_home.predict(features)[0]
             pred_a = self.lgb_away.predict(features)[0]
+            base_preds['lightgbm'] = np.array([pred_h, pred_a])
         else:
-            pred_h = 1.0
-            pred_a = 1.0
-            
-        base_preds['lightgbm'] = np.array([pred_h])
+            base_preds['lightgbm'] = np.array([1.0, 1.0])
         
         meta_h = self.meta_home.predict(base_preds)
         meta_d = self.meta_draw.predict(base_preds)

@@ -60,6 +60,18 @@ class LightGBMModel:
         preds = self.model.predict(X_pred)
         return np.maximum(0.0, preds)
         
+    def get_shap_values(self, X: pd.DataFrame):
+        """Calculates SHAP values for feature interpretability."""
+        import shap
+        X_pred = X.copy()
+        for col in self.cat_features:
+            if col in X_pred.columns:
+                X_pred[col] = X_pred[col].astype('category')
+                
+        explainer = shap.TreeExplainer(self.model)
+        shap_values = explainer.shap_values(X_pred)
+        return shap_values, explainer
+        
     def save_model(self, path: str):
         self.model.booster_.save_model(path)
         
