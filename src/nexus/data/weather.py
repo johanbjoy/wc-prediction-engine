@@ -4,11 +4,17 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+_WEATHER_CACHE = {}
+
 def get_weather_factor(city_name: str) -> float:
     """
     Fetches real-time weather from OpenWeatherMap for the match city.
     Calculates a weather dampening factor. High wind/rain reduces the expected goals.
     """
+    global _WEATHER_CACHE
+    if city_name in _WEATHER_CACHE:
+        return _WEATHER_CACHE[city_name]
+
     api_key = os.getenv("OPENWEATHERMAP_API_KEY")
     if not api_key or not city_name:
         return 1.0
@@ -31,7 +37,9 @@ def get_weather_factor(city_name: str) -> float:
         if rain_1h > 5.0:
             factor -= 0.10
             
-        return max(0.80, factor) # Floor at 80%
+        factor = max(0.80, factor) # Floor at 80%
+        _WEATHER_CACHE[city_name] = factor
+        return factor
 
     except Exception as e:
         logger.warning(f"Weather API failed for {city_name}: {e}")

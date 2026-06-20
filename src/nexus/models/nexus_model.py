@@ -20,31 +20,42 @@ try:
 except ImportError:
     TRANSFORMER_AVAILABLE = False
 
+_ALL_COMPLETED_FIXTURES = None
+
 def _calculate_rest_days(team: str, current_match_date: str) -> float:
     """Calculates schedule congestion (days since last match)."""
-    conn = get_connection()
+    global _ALL_COMPLETED_FIXTURES
+    if _ALL_COMPLETED_FIXTURES is None:
+        conn = get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT home_team, away_team, match_date FROM fixtures 
+                    WHERE status IN ('FT', 'AET', 'PEN')
+                    ORDER BY match_date ASC
+                """)
+                _ALL_COMPLETED_FIXTURES = [dict(r) for r in cur.fetchall()]
+        finally:
+            conn.close()
+
+    # Find the most recent match for the team that happened BEFORE current_match_date
+    last_date_str = None
+    for f in reversed(_ALL_COMPLETED_FIXTURES):
+        if (f["home_team"] == team or f["away_team"] == team) and f["match_date"] < current_match_date:
+            last_date_str = f["match_date"]
+            break
+
+    if not last_date_str:
+        return 7.0 # Default to 1 week rest if no prior matches
+    
+    # Simple approximation of rest days using string dates
     try:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT match_date FROM fixtures 
-                WHERE (home_team = %s OR away_team = %s) 
-                AND status IN ('FT', 'AET', 'PEN')
-                ORDER BY match_date DESC LIMIT 1
-            """, (team, team))
-            row = cur.fetchone()
-            if not row:
-                return 7.0 # Default to 1 week rest if no prior matches
-            
-            # Simple approximation of rest days using string dates
-            try:
-                last_date = pd.to_datetime(row["match_date"].split(" UTC")[0])
-                curr_date = pd.to_datetime(current_match_date.split(" UTC")[0])
-                diff = (curr_date - last_date).days
-                return float(max(0, diff))
-            except Exception:
-                return 7.0
-    finally:
-        conn.close()
+        last_date = pd.to_datetime(last_date_str.split(" UTC")[0])
+        curr_date = pd.to_datetime(current_match_date.split(" UTC")[0])
+        diff = (curr_date - last_date).days
+        return float(max(0, diff))
+    except Exception:
+        return 7.0
 
 def predict(home_team: str, away_team: str, tournament: str, current_date: str, elo_home: float, elo_away: float, form_h: float, form_a: float) -> dict:
     home_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data_store", "models", "nexus_home.cbm"))
@@ -106,9 +117,20 @@ def predict(home_team: str, away_team: str, tournament: str, current_date: str, 
     pred_away = max(0.0, float(model_away.predict(features)[0]))
     
     # Phase 7: Apply Dynamic Adaptive Momentum
-    from src.nexus.data.database import get_team_momentum
-    h_mom = get_team_momentum(home_team)
-    a_mom = get_team_momentum(away_team)
+    global _TEAM_MOMENTUM_CACHE
+    if '_TEAM_MOMENTUM_CACHE' not in globals() or _TEAM_MOMENTUM_CACHE is None:
+        conn = get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT team_name, momentum_score FROM team_momentum")
+                _TEAM_MOMENTUM_CACHE = {r["team_name"]: float(r["momentum_score"]) for r in cur.fetchall()}
+        except Exception:
+            _TEAM_MOMENTUM_CACHE = {}
+        finally:
+            conn.close()
+            
+    h_mom = _TEAM_MOMENTUM_CACHE.get(home_team, 1.0)
+    a_mom = _TEAM_MOMENTUM_CACHE.get(away_team, 1.0)
     
     # Apply momentum directly to the CatBoost expected goals (xG)
     pred_home *= h_mom

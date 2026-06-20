@@ -335,7 +335,7 @@ def run_all_upcoming(limit=104):
 if __name__ == "__main__":
     from src.nexus.data.database import init_db
     from src.nexus.data.scraper  import fetch_and_store_fixtures
-    from evaluator     import evaluate_all_pending, rebuild_leaderboard, check_and_evaluate_recent
+    from src.nexus.core.evaluator import evaluate_all_pending, rebuild_leaderboard, check_and_evaluate_recent
     
     init_db()
     fetch_and_store_fixtures()
