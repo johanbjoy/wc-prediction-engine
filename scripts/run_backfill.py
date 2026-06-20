@@ -42,27 +42,23 @@ def run_backfill():
                 if not result:
                     continue
                     
-                probs = result.get("dixon_coles_probs", {})
+                probs = result.get("blended_probs", result.get("dixon_coles_probs", {}))
                 ph = probs.get("p_home_win", 0.33)
                 pd = probs.get("p_draw", 0.33)
                 pa = probs.get("p_away_win", 0.33)
                 
-                matrix = np.array(probs.get("matrix", []))
-                if matrix.size > 0:
-                    pred_h, pred_a = np.unravel_index(np.argmax(matrix), matrix.shape)
-                    pred_h, pred_a = int(pred_h), int(pred_a)
-                else:
-                    base_h = result.get("nexus_home_xg", 1.0)
-                    base_a = result.get("nexus_away_xg", 1.0)
-                    pred_h = int(round(base_h))
-                    pred_a = int(round(base_a))
-                    if pa > ph and pa > pd and pred_a <= pred_h:
-                        pred_a = pred_h + 1
-                    elif ph > pa and ph > pd and pred_h <= pred_a:
-                        pred_h = pred_a + 1
-                    elif pd > ph and pd > pa and pred_h != pred_a:
-                        pred_h = max(pred_h, pred_a)
-                        pred_a = pred_h
+                base_h = result.get("nexus_home_xg", 1.0)
+                base_a = result.get("nexus_away_xg", 1.0)
+                pred_h = int(round(base_h))
+                pred_a = int(round(base_a))
+                
+                if pa > ph and pa > pd and pred_a <= pred_h:
+                    pred_a = pred_h + 1
+                elif ph > pa and ph > pd and pred_h <= pred_a:
+                    pred_h = pred_a + 1
+                elif pd > ph and pd > pa and pred_h != pred_a:
+                    pred_h = max(pred_h, pred_a)
+                    pred_a = pred_h
                     
                 class NumpyEncoder(json.JSONEncoder):
                     def default(self, obj):

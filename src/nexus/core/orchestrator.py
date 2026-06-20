@@ -286,18 +286,21 @@ def run_pipeline(fixture_id=None):
             "p_home_win": p_home, "p_draw": p_draw, "p_away_win": p_away
         })
 
-    import numpy as np
-    matrix = np.array(dc_probs.get("matrix", []))
-    
-    if matrix.size > 0:
-        home_score, away_score = np.unravel_index(np.argmax(matrix), matrix.shape)
-    else:
-        import math
-        ROUND_BIAS = -0.10
-        home_score = max(0, int(math.floor(blended_home_xg + 0.5 + ROUND_BIAS)))
-        away_score = max(0, int(math.floor(blended_away_xg + 0.5 + ROUND_BIAS)))
-        
-    home_score, away_score = int(home_score), int(away_score)
+    probs = nex_out.get("blended_probs", nex_out.get("dixon_coles_probs", {}))
+    ph = probs.get("p_home_win", 0.33)
+    pd = probs.get("p_draw", 0.33)
+    pa = probs.get("p_away_win", 0.33)
+
+    home_score = int(round(blended_home_xg))
+    away_score = int(round(blended_away_xg))
+
+    if pa > ph and pa > pd and away_score <= home_score:
+        away_score = home_score + 1
+    elif ph > pa and ph > pd and home_score <= away_score:
+        home_score = away_score + 1
+    elif pd > ph and pd > pa and home_score != away_score:
+        home_score = max(home_score, away_score)
+        away_score = home_score
 
     if p_home > p_away and p_home > p_draw:
         predicted_winner = home_team
