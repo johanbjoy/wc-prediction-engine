@@ -33,7 +33,7 @@ def get_flag(team):
 
 @st.cache_data(ttl=300)
 def load_worldcup_data():
-    comp = get_completed_predictions()
+    comp = get_completed_predictions(limit=1000)
     upc = get_upcoming_predictions(limit=50)
     
     all_rows = []
