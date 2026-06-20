@@ -32,7 +32,7 @@ def get_flag(team):
     return flags.get(team, "🏳️")
 
 @st.cache_data(ttl=300)
-def load_worldcup_data_v2():
+def load_worldcup_data():
     comp = get_completed_predictions(limit=1000)
     upc = get_upcoming_predictions(limit=50)
     
@@ -118,8 +118,25 @@ def load_worldcup_data_v2():
         })
         
     df = pd.DataFrame(all_rows)
+    def _parse_match_date(date_str):
+        try:
+            if 'UTC' in date_str:
+                parts = date_str.split(' UTC')
+                base_time = pd.to_datetime(parts[0])
+                offset_str = parts[1]
+                if offset_str:
+                    offset_hours = int(offset_str)
+                    utc_time = base_time - pd.Timedelta(hours=offset_hours)
+                else:
+                    utc_time = base_time
+                return utc_time.tz_localize('UTC')
+            else:
+                return pd.to_datetime(date_str, utc=True)
+        except Exception:
+            return pd.NaT
+
     if len(df) > 0:
-        df['_sort_date'] = pd.to_datetime(df['match_date'].astype(str).str.replace(' UTC', ':00', regex=False), utc=True)
+        df['_sort_date'] = df['match_date'].astype(str).apply(_parse_match_date)
     else:
         return pd.DataFrame(columns=[
             'match_id', 'match_date', 'home_team', 'away_team', 'stage', 

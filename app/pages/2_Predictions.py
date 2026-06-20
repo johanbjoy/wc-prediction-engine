@@ -5,7 +5,7 @@ if root_dir not in sys.path:
 
 import streamlit as st
 from app.components.css import apply_command_center_css
-from app.components.utils import load_worldcup_data_v2
+from app.components.utils import load_worldcup_data
 from app.components.prediction_card import render_prediction_card
 from app.components.uncertainty_viz import render_probability_donut
 
@@ -15,7 +15,7 @@ apply_command_center_css()
 st.title("🎯 Upcoming Match Predictions")
 st.markdown("Deep Stack ensemble predictions powered by LightGBM, TabNet, and TFT.")
 
-df = load_worldcup_data_v2()
+df = load_worldcup_data()
 df_upcoming = df[df['is_upcoming']].sort_values('_sort_date')
 
 if len(df_upcoming) == 0:

@@ -5,7 +5,7 @@ if root_dir not in sys.path:
 
 import streamlit as st
 from app.components.css import apply_command_center_css
-from app.components.utils import load_worldcup_data_v2
+from app.components.utils import load_worldcup_data
 from app.components.prediction_card import render_prediction_card
 
 st.set_page_config(page_title="Match History", page_icon="📜", layout="wide")
@@ -14,7 +14,7 @@ apply_command_center_css()
 st.title("📜 Match History & Evaluation")
 st.markdown("Full historical timeline of predictions graded against real-world actual outcomes.")
 
-df = load_worldcup_data_v2()
+df = load_worldcup_data()
 df_comp = df[~df['is_upcoming']].sort_values('_sort_date', ascending=False)
 
 if len(df_comp) == 0:
