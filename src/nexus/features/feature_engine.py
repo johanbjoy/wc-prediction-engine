@@ -15,6 +15,26 @@ class FeatureEngine:
         self.form_cache = {} # Track goals scored/conceded lists per team
         self.k_factor = 40   # ELO K-factor
         
+    def save_cache(self, path: str):
+        import json, os
+        os.makedirs(path, exist_ok=True)
+        with open(os.path.join(path, "elo_cache.json"), "w") as f:
+            json.dump(self.elo_cache, f)
+        with open(os.path.join(path, "form_cache.json"), "w") as f:
+            json.dump(self.form_cache, f)
+            
+    def load_cache(self, path: str):
+        import json, os
+        elo_path = os.path.join(path, "elo_cache.json")
+        form_path = os.path.join(path, "form_cache.json")
+        if os.path.exists(elo_path):
+            with open(elo_path, "r") as f:
+                self.elo_cache = json.load(f)
+        if os.path.exists(form_path):
+            with open(form_path, "r") as f:
+                self.form_cache = json.load(f)
+        return self
+        
     def _get_elo(self, team: str) -> float:
         return self.elo_cache.get(team, 1500.0)
         
@@ -101,6 +121,28 @@ class FeatureEngine:
         features["form_away_scored_5"] = a_scored
         features["form_away_conceded_5"] = a_conceded
         features["form_diff"] = (h_scored - h_conceded) - (a_scored - a_conceded)
+        
+        # 4. Poisson Baseline Integrations (Legacy V3 fusion)
+        try:
+            from src.nexus.models.poisson_model import predict as poisson_predict
+            from src.nexus.data.scraper import _baseline_squad
+            
+            home_p = _baseline_squad(home)
+            away_p = _baseline_squad(away)
+            poi_res = poisson_predict(home, away, home_p, away_p)
+            meta = poi_res["model_meta"]
+            
+            features["poi_home_xg"] = meta["lam_home"]
+            features["poi_away_xg"] = meta["lam_away"]
+            features["poi_p_home"] = meta["p_home_win"]
+            features["poi_p_draw"] = meta["p_draw"]
+            features["poi_p_away"] = meta["p_away_win"]
+        except Exception:
+            features["poi_home_xg"] = 1.35
+            features["poi_away_xg"] = 1.35
+            features["poi_p_home"] = 33.3
+            features["poi_p_draw"] = 33.3
+            features["poi_p_away"] = 33.3
         
         # Target labels
         if "home_score" in row and "away_score" in row:

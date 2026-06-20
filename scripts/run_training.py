@@ -26,6 +26,12 @@ def train_nexus_v2():
     print(f"Generating 80+ features for {len(df)} matches using FeatureEngine...")
     fe = FeatureEngine()
     features_df = fe.generate_features(df, is_training=True)
+    os.makedirs(SAVE_DIR, exist_ok=True)
+    fe.save_cache(SAVE_DIR)
+    
+    # Save the accumulated caches for inference
+    os.makedirs(SAVE_DIR, exist_ok=True)
+    fe.save_cache(SAVE_DIR)
     
     X = features_df.drop(columns=["target_home_score", "target_away_score", "target_home_xg", "target_away_xg"], errors="ignore")
     

@@ -3,339 +3,339 @@
     "data": [
         {
             "team": "Argentina",
-            "win_prob": 0.245,
-            "final_prob": 0.357,
-            "semi_prob": 0.48,
+            "win_prob": 0.2,
+            "final_prob": 0.304,
+            "semi_prob": 0.43,
             "knockout_prob": 0.985
         },
         {
             "team": "Brazil",
-            "win_prob": 0.161,
-            "final_prob": 0.276,
-            "semi_prob": 0.39,
-            "knockout_prob": 0.989
+            "win_prob": 0.157,
+            "final_prob": 0.263,
+            "semi_prob": 0.4,
+            "knockout_prob": 0.978
         },
         {
             "team": "France",
-            "win_prob": 0.122,
-            "final_prob": 0.217,
-            "semi_prob": 0.368,
-            "knockout_prob": 0.948
+            "win_prob": 0.132,
+            "final_prob": 0.224,
+            "semi_prob": 0.353,
+            "knockout_prob": 0.95
         },
         {
             "team": "Spain",
-            "win_prob": 0.114,
-            "final_prob": 0.198,
-            "semi_prob": 0.342,
-            "knockout_prob": 0.951
+            "win_prob": 0.111,
+            "final_prob": 0.199,
+            "semi_prob": 0.326,
+            "knockout_prob": 0.943
         },
         {
             "team": "England",
-            "win_prob": 0.083,
-            "final_prob": 0.179,
-            "semi_prob": 0.314,
-            "knockout_prob": 0.96
+            "win_prob": 0.104,
+            "final_prob": 0.177,
+            "semi_prob": 0.31,
+            "knockout_prob": 0.962
         },
         {
             "team": "Portugal",
-            "win_prob": 0.072,
-            "final_prob": 0.159,
-            "semi_prob": 0.305,
-            "knockout_prob": 0.977
+            "win_prob": 0.073,
+            "final_prob": 0.164,
+            "semi_prob": 0.315,
+            "knockout_prob": 0.97
         },
         {
             "team": "Netherlands",
-            "win_prob": 0.036,
-            "final_prob": 0.094,
-            "semi_prob": 0.186,
-            "knockout_prob": 0.896
-        },
-        {
-            "team": "Belgium",
-            "win_prob": 0.034,
-            "final_prob": 0.067,
-            "semi_prob": 0.157,
-            "knockout_prob": 0.864
+            "win_prob": 0.045,
+            "final_prob": 0.105,
+            "semi_prob": 0.232,
+            "knockout_prob": 0.876
         },
         {
             "team": "Germany",
+            "win_prob": 0.034,
+            "final_prob": 0.083,
+            "semi_prob": 0.169,
+            "knockout_prob": 0.766
+        },
+        {
+            "team": "Belgium",
             "win_prob": 0.031,
-            "final_prob": 0.085,
-            "semi_prob": 0.182,
-            "knockout_prob": 0.775
+            "final_prob": 0.076,
+            "semi_prob": 0.159,
+            "knockout_prob": 0.865
         },
         {
             "team": "Uruguay",
-            "win_prob": 0.028,
-            "final_prob": 0.084,
-            "semi_prob": 0.179,
+            "win_prob": 0.022,
+            "final_prob": 0.066,
+            "semi_prob": 0.183,
             "knockout_prob": 0.955
         },
         {
             "team": "Italy",
-            "win_prob": 0.026,
-            "final_prob": 0.051,
-            "semi_prob": 0.152,
-            "knockout_prob": 0.8109999999999999
+            "win_prob": 0.019,
+            "final_prob": 0.071,
+            "semi_prob": 0.149,
+            "knockout_prob": 0.8240000000000001
         },
         {
             "team": "Croatia",
-            "win_prob": 0.01,
-            "final_prob": 0.052,
-            "semi_prob": 0.141,
-            "knockout_prob": 0.967
+            "win_prob": 0.019,
+            "final_prob": 0.063,
+            "semi_prob": 0.151,
+            "knockout_prob": 0.963
         },
         {
-            "team": "Switzerland",
-            "win_prob": 0.007,
-            "final_prob": 0.013,
-            "semi_prob": 0.048,
-            "knockout_prob": 0.548
+            "team": "Sweden",
+            "win_prob": 0.012,
+            "final_prob": 0.036,
+            "semi_prob": 0.088,
+            "knockout_prob": 0.882
         },
         {
             "team": "Colombia",
             "win_prob": 0.005,
-            "final_prob": 0.008,
-            "semi_prob": 0.038,
-            "knockout_prob": 0.781
-        },
-        {
-            "team": "Sweden",
-            "win_prob": 0.005,
-            "final_prob": 0.028,
-            "semi_prob": 0.101,
-            "knockout_prob": 0.854
+            "final_prob": 0.013,
+            "semi_prob": 0.043,
+            "knockout_prob": 0.761
         },
         {
             "team": "Morocco",
-            "win_prob": 0.003,
-            "final_prob": 0.013,
-            "semi_prob": 0.052,
-            "knockout_prob": 0.618
+            "win_prob": 0.004,
+            "final_prob": 0.007,
+            "semi_prob": 0.037,
+            "knockout_prob": 0.635
         },
         {
-            "team": "Mexico",
-            "win_prob": 0.002,
-            "final_prob": 0.005,
-            "semi_prob": 0.011,
-            "knockout_prob": 0.253
-        },
-        {
-            "team": "Costa Rica",
-            "win_prob": 0.002,
-            "final_prob": 0.005,
-            "semi_prob": 0.023,
-            "knockout_prob": 0.644
+            "team": "Poland",
+            "win_prob": 0.004,
+            "final_prob": 0.009,
+            "semi_prob": 0.031,
+            "knockout_prob": 0.792
         },
         {
             "team": "Japan",
-            "win_prob": 0.001,
-            "final_prob": 0.005,
-            "semi_prob": 0.036,
-            "knockout_prob": 0.675
+            "win_prob": 0.003,
+            "final_prob": 0.011,
+            "semi_prob": 0.041,
+            "knockout_prob": 0.644
+        },
+        {
+            "team": "Turkey",
+            "win_prob": 0.003,
+            "final_prob": 0.008,
+            "semi_prob": 0.024,
+            "knockout_prob": 0.734
+        },
+        {
+            "team": "Algeria",
+            "win_prob": 0.003,
+            "final_prob": 0.006,
+            "semi_prob": 0.016,
+            "knockout_prob": 0.473
+        },
+        {
+            "team": "Egypt",
+            "win_prob": 0.003,
+            "final_prob": 0.009,
+            "semi_prob": 0.029,
+            "knockout_prob": 0.744
+        },
+        {
+            "team": "Switzerland",
+            "win_prob": 0.002,
+            "final_prob": 0.014,
+            "semi_prob": 0.041,
+            "knockout_prob": 0.5469999999999999
+        },
+        {
+            "team": "Austria",
+            "win_prob": 0.002,
+            "final_prob": 0.006,
+            "semi_prob": 0.042,
+            "knockout_prob": 0.772
+        },
+        {
+            "team": "Hungary",
+            "win_prob": 0.002,
+            "final_prob": 0.007,
+            "semi_prob": 0.029,
+            "knockout_prob": 0.633
+        },
+        {
+            "team": "Mali",
+            "win_prob": 0.002,
+            "final_prob": 0.004,
+            "semi_prob": 0.021,
+            "knockout_prob": 0.638
+        },
+        {
+            "team": "Ivory Coast",
+            "win_prob": 0.002,
+            "final_prob": 0.008,
+            "semi_prob": 0.032,
+            "knockout_prob": 0.617
         },
         {
             "team": "Denmark",
             "win_prob": 0.001,
-            "final_prob": 0.023,
-            "semi_prob": 0.073,
-            "knockout_prob": 0.867
-        },
-        {
-            "team": "South Korea",
-            "win_prob": 0.001,
-            "final_prob": 0.005,
-            "semi_prob": 0.032,
-            "knockout_prob": 0.731
-        },
-        {
-            "team": "Australia",
-            "win_prob": 0.001,
-            "final_prob": 0.006,
-            "semi_prob": 0.019,
-            "knockout_prob": 0.883
-        },
-        {
-            "team": "Austria",
-            "win_prob": 0.001,
-            "final_prob": 0.013,
-            "semi_prob": 0.05,
-            "knockout_prob": 0.788
-        },
-        {
-            "team": "Hungary",
-            "win_prob": 0.001,
-            "final_prob": 0.006,
-            "semi_prob": 0.02,
-            "knockout_prob": 0.6
+            "final_prob": 0.016,
+            "semi_prob": 0.077,
+            "knockout_prob": 0.87
         },
         {
             "team": "Serbia",
             "win_prob": 0.001,
             "final_prob": 0.003,
-            "semi_prob": 0.009,
-            "knockout_prob": 0.46299999999999997
-        },
-        {
-            "team": "Scotland",
-            "win_prob": 0.001,
-            "final_prob": 0.004,
-            "semi_prob": 0.019,
-            "knockout_prob": 0.587
-        },
-        {
-            "team": "Turkey",
-            "win_prob": 0.001,
-            "final_prob": 0.004,
-            "semi_prob": 0.02,
-            "knockout_prob": 0.731
-        },
-        {
-            "team": "Ecuador",
-            "win_prob": 0.001,
-            "final_prob": 0.008,
-            "semi_prob": 0.02,
-            "knockout_prob": 0.63
-        },
-        {
-            "team": "Algeria",
-            "win_prob": 0.001,
-            "final_prob": 0.001,
-            "semi_prob": 0.01,
-            "knockout_prob": 0.489
-        },
-        {
-            "team": "Egypt",
-            "win_prob": 0.001,
-            "final_prob": 0.004,
-            "semi_prob": 0.02,
-            "knockout_prob": 0.741
+            "semi_prob": 0.012,
+            "knockout_prob": 0.44099999999999995
         },
         {
             "team": "Nigeria",
             "win_prob": 0.001,
-            "final_prob": 0.003,
-            "semi_prob": 0.018,
-            "knockout_prob": 0.607
+            "final_prob": 0.001,
+            "semi_prob": 0.015,
+            "knockout_prob": 0.5920000000000001
         },
         {
-            "team": "Canada",
+            "team": "Saudi Arabia",
+            "win_prob": 0.001,
+            "final_prob": 0.004,
+            "semi_prob": 0.011,
+            "knockout_prob": 0.583
+        },
+        {
+            "team": "Qatar",
             "win_prob": 0.001,
             "final_prob": 0.002,
-            "semi_prob": 0.002,
-            "knockout_prob": 0.20999999999999996
+            "semi_prob": 0.009,
+            "knockout_prob": 0.497
+        },
+        {
+            "team": "Costa Rica",
+            "win_prob": 0.001,
+            "final_prob": 0.004,
+            "semi_prob": 0.017,
+            "knockout_prob": 0.601
         },
         {
             "team": "USA",
             "win_prob": 0.0,
-            "final_prob": 0.0,
-            "semi_prob": 0.009,
-            "knockout_prob": 0.7030000000000001
+            "final_prob": 0.002,
+            "semi_prob": 0.006,
+            "knockout_prob": 0.7090000000000001
+        },
+        {
+            "team": "Mexico",
+            "win_prob": 0.0,
+            "final_prob": 0.001,
+            "semi_prob": 0.011,
+            "knockout_prob": 0.274
         },
         {
             "team": "Senegal",
             "win_prob": 0.0,
             "final_prob": 0.001,
-            "semi_prob": 0.006,
-            "knockout_prob": 0.373
+            "semi_prob": 0.011,
+            "knockout_prob": 0.361
         },
         {
             "team": "Iran",
             "win_prob": 0.0,
-            "final_prob": 0.0,
+            "final_prob": 0.002,
+            "semi_prob": 0.012,
+            "knockout_prob": 0.813
+        },
+        {
+            "team": "South Korea",
+            "win_prob": 0.0,
+            "final_prob": 0.007,
+            "semi_prob": 0.032,
+            "knockout_prob": 0.767
+        },
+        {
+            "team": "Australia",
+            "win_prob": 0.0,
+            "final_prob": 0.004,
             "semi_prob": 0.017,
-            "knockout_prob": 0.835
+            "knockout_prob": 0.904
         },
         {
             "team": "Ukraine",
             "win_prob": 0.0,
             "final_prob": 0.002,
-            "semi_prob": 0.013,
-            "knockout_prob": 0.42600000000000005
-        },
-        {
-            "team": "Poland",
-            "win_prob": 0.0,
-            "final_prob": 0.003,
-            "semi_prob": 0.03,
-            "knockout_prob": 0.779
+            "semi_prob": 0.016,
+            "knockout_prob": 0.46299999999999997
         },
         {
             "team": "Wales",
             "win_prob": 0.0,
-            "final_prob": 0.003,
-            "semi_prob": 0.017,
-            "knockout_prob": 0.5429999999999999
+            "final_prob": 0.001,
+            "semi_prob": 0.015,
+            "knockout_prob": 0.5369999999999999
         },
         {
             "team": "Peru",
             "win_prob": 0.0,
             "final_prob": 0.003,
+            "semi_prob": 0.01,
+            "knockout_prob": 0.46299999999999997
+        },
+        {
+            "team": "Scotland",
+            "win_prob": 0.0,
+            "final_prob": 0.003,
             "semi_prob": 0.02,
-            "knockout_prob": 0.48
+            "knockout_prob": 0.5720000000000001
+        },
+        {
+            "team": "Ecuador",
+            "win_prob": 0.0,
+            "final_prob": 0.002,
+            "semi_prob": 0.014,
+            "knockout_prob": 0.608
         },
         {
             "team": "Chile",
             "win_prob": 0.0,
-            "final_prob": 0.002,
-            "semi_prob": 0.007,
-            "knockout_prob": 0.384
+            "final_prob": 0.004,
+            "semi_prob": 0.009,
+            "knockout_prob": 0.363
         },
         {
             "team": "Tunisia",
             "win_prob": 0.0,
             "final_prob": 0.0,
-            "semi_prob": 0.001,
-            "knockout_prob": 0.24
+            "semi_prob": 0.004,
+            "knockout_prob": 0.235
         },
         {
             "team": "Cameroon",
             "win_prob": 0.0,
-            "final_prob": 0.0,
-            "semi_prob": 0.008,
-            "knockout_prob": 0.44499999999999995
-        },
-        {
-            "team": "Mali",
-            "win_prob": 0.0,
             "final_prob": 0.001,
-            "semi_prob": 0.009,
-            "knockout_prob": 0.638
+            "semi_prob": 0.014,
+            "knockout_prob": 0.44999999999999996
         },
         {
-            "team": "Ivory Coast",
-            "win_prob": 0.0,
-            "final_prob": 0.004,
-            "semi_prob": 0.026,
-            "knockout_prob": 0.5880000000000001
-        },
-        {
-            "team": "Saudi Arabia",
+            "team": "Canada",
             "win_prob": 0.0,
             "final_prob": 0.0,
             "semi_prob": 0.004,
-            "knockout_prob": 0.5880000000000001
-        },
-        {
-            "team": "Qatar",
-            "win_prob": 0.0,
-            "final_prob": 0.001,
-            "semi_prob": 0.007,
-            "knockout_prob": 0.473
+            "knockout_prob": 0.20999999999999996
         },
         {
             "team": "Panama",
             "win_prob": 0.0,
-            "final_prob": 0.0,
-            "semi_prob": 0.004,
-            "knockout_prob": 0.26
+            "final_prob": 0.003,
+            "semi_prob": 0.006,
+            "knockout_prob": 0.29400000000000004
         },
         {
             "team": "New Zealand",
             "win_prob": 0.0,
-            "final_prob": 0.002,
-            "semi_prob": 0.005,
-            "knockout_prob": 0.46699999999999997
+            "final_prob": 0.001,
+            "semi_prob": 0.007,
+            "knockout_prob": 0.484
         }
     ]
 }

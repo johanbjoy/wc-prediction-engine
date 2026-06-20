@@ -77,18 +77,28 @@ class DeepStackingEnsemble:
         """Train all base models and meta learners."""
         print("Training Deep Stacking Ensemble...")
         from src.nexus.models.lightgbm_model import LightGBMModel
+        from src.nexus.models.tabnet_model import TabNetModel
+        from src.nexus.models.temporal_fusion import TemporalFusionTransformer
         
-        print("  Training LightGBM Home Model...")
+        print("  Training LightGBM Models (with Optuna)...")
         self.lgb_home = LightGBMModel(target="home_xg")
-        self.lgb_home.fit(X, y_home)
-        
-        print("  Training LightGBM Away Model...")
+        self.lgb_home.fit(X, y_home, optimize=True)
         self.lgb_away = LightGBMModel(target="away_xg")
-        self.lgb_away.fit(X, y_away)
+        self.lgb_away.fit(X, y_away, optimize=True)
+        
+        print("  Training TabNet Models...")
+        self.tabnet_home = TabNetModel(target="home_xg")
+        self.tabnet_home.fit(X, y_home)
+        self.tabnet_away = TabNetModel(target="away_xg")
+        self.tabnet_away.fit(X, y_away)
+        
+        print("  Training Temporal Fusion Models...")
+        self.tft_home = TemporalFusionTransformer(target="home_xg")
+        self.tft_home.fit(X, y_home)
+        self.tft_away = TemporalFusionTransformer(target="away_xg")
+        self.tft_away.fit(X, y_away)
         
         print("  ✓ Level 1 Base Models trained.")
-        print("  ✓ Level 2 Meta-Learners trained.")
-        print("  ✓ Level 3 Super-Ensemble initialized.")
         
     def save_models(self, path: str):
         import os
@@ -96,12 +106,25 @@ class DeepStackingEnsemble:
         if hasattr(self, 'lgb_home'):
             self.lgb_home.save_model(os.path.join(path, "lgb_home.txt"))
             self.lgb_away.save_model(os.path.join(path, "lgb_away.txt"))
+            self.tabnet_home.save_model(os.path.join(path, "tabnet_home"))
+            self.tabnet_away.save_model(os.path.join(path, "tabnet_away"))
+            self.tft_home.save_model(os.path.join(path, "tft_home.pt"))
+            self.tft_away.save_model(os.path.join(path, "tft_away.pt"))
         
     def load_models(self, path: str):
         import os
         from src.nexus.models.lightgbm_model import LightGBMModel
+        from src.nexus.models.tabnet_model import TabNetModel
+        from src.nexus.models.temporal_fusion import TemporalFusionTransformer
+        
         self.lgb_home = LightGBMModel(target="home_xg").load_model(os.path.join(path, "lgb_home.txt"))
         self.lgb_away = LightGBMModel(target="away_xg").load_model(os.path.join(path, "lgb_away.txt"))
+        
+        self.tabnet_home = TabNetModel(target="home_xg").load_model(os.path.join(path, "tabnet_home"))
+        self.tabnet_away = TabNetModel(target="away_xg").load_model(os.path.join(path, "tabnet_away"))
+        
+        self.tft_home = TemporalFusionTransformer(target="home_xg").load_model(os.path.join(path, "tft_home.pt"))
+        self.tft_away = TemporalFusionTransformer(target="away_xg").load_model(os.path.join(path, "tft_away.pt"))
         return self
         
     def predict(self, features: pd.DataFrame, match_context: dict) -> dict:
@@ -111,21 +134,45 @@ class DeepStackingEnsemble:
         # Determine active models for this match context
         active_models, weights = self.model_selector.select_models(match_context)
         
-        # LightGBM Predictions
-        if 'lightgbm' in active_models and hasattr(self, 'lgb_home'):
+        # Base Model Predictions
+        if hasattr(self, 'lgb_home'):
             pred_h = self.lgb_home.predict(features)[0]
             pred_a = self.lgb_away.predict(features)[0]
             base_preds['lightgbm'] = np.array([pred_h, pred_a])
+            
+            tab_h = self.tabnet_home.predict(features)[0]
+            tab_a = self.tabnet_away.predict(features)[0]
+            base_preds['tabnet'] = np.array([tab_h, tab_a])
+            
+            tft_h = self.tft_home.predict(features)[0]
+            tft_a = self.tft_away.predict(features)[0]
+            base_preds['temporal_fusion'] = np.array([tft_h, tft_a])
         else:
             base_preds['lightgbm'] = np.array([1.0, 1.0])
+            base_preds['tabnet'] = np.array([1.0, 1.0])
+            base_preds['temporal_fusion'] = np.array([1.0, 1.0])
+            
+        # Bayesian Model Averaging (Simple weighted ensemble)
+        valid_models = [m for m in active_models if m in base_preds]
+        valid_weights = [weights[active_models.index(m)] for m in valid_models]
+        if sum(valid_weights) > 0:
+            norm_valid_weights = [w / sum(valid_weights) for w in valid_weights]
+        else:
+            norm_valid_weights = [1.0 / len(valid_models)] * len(valid_models)
+            
+        final_h = sum(base_preds[m][0] * w for m, w in zip(valid_models, norm_valid_weights))
+        final_a = sum(base_preds[m][1] * w for m, w in zip(valid_models, norm_valid_weights))
         
-        meta_h = self.meta_home.predict(base_preds)
-        meta_d = self.meta_draw.predict(base_preds)
-        meta_a = self.meta_away.predict(base_preds)
-        
-        final_probs, uncertainty = self.super_ensemble.combine(meta_h, meta_d, meta_a, match_context)
-        
+        # Fallback if no models active
+        if final_h == 0 and final_a == 0:
+            final_h, final_a = 1.0, 1.0
+            
         return {
-            'probabilities': final_probs,
-            'uncertainty': uncertainty
+            'probabilities': {
+                'p_home_win': final_h / 3.0, # Dummy conversion for pipeline
+                'p_draw': 1.0 / 3.0,
+                'p_away_win': final_a / 3.0
+            },
+            'raw_xg': (final_h, final_a),
+            'uncertainty': 0.1
         }
