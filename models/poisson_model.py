@@ -15,7 +15,7 @@ World Cup context: neutral venues → VENUE_FACTOR = 1.0 (no home advantage).
 """
 import math
 import random
-from src.nexus.data.scraper import TEAM_BASELINES
+from data.scraper import TEAM_BASELINES
 
 LEAGUE_AVG_GOALS = 1.35   # WC historical: ~1.35 goals per team per match
 VENUE_FACTOR     = 1.0    # Neutral site

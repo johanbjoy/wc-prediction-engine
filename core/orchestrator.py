@@ -25,13 +25,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from src.nexus.data.database import get_connection
-from src.nexus.data.scraper import get_starting_xi, get_upcoming_fixtures
+from data.database import get_connection
+from data.scraper import get_starting_xi, get_upcoming_fixtures
 
-from src.nexus.models.nexus_model import predict as run_nexus
+from models.nexus_model import predict as run_nexus
 
-from src.nexus.agents.analyst import build_tactical_prompt, call_llm
-from src.nexus.agents.predictor import build_prediction_prompt, call_gemini, call_grok, call_groq, parse_prediction_json
+from agents.analyst import build_tactical_prompt, call_llm
+from agents.predictor import build_prediction_prompt, call_gemini, call_grok, call_groq, parse_prediction_json
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -196,13 +196,13 @@ def run_pipeline(fixture_id=None):
         is_knockout = True
 
     # --- N.E.X.U.S. V2 EXECUTION ---
-    from src.nexus.data.scraper import TEAM_BASELINES
+    from data.scraper import TEAM_BASELINES
     hb = TEAM_BASELINES.get(home_team, TEAM_BASELINES["Default"])
     ab = TEAM_BASELINES.get(away_team, TEAM_BASELINES["Default"])
     elo_home = hb.get("elo", 1800)
     elo_away = ab.get("elo", 1800)
     
-    from src.nexus.data.tournament_form import get_tournament_form
+    from data.tournament_form import get_tournament_form
     home_form = get_tournament_form(home_team)["form_modifier"]
     away_form = get_tournament_form(away_team)["form_modifier"]
 
@@ -243,8 +243,8 @@ def run_pipeline(fixture_id=None):
     tactical_preview = _cache_get(cache_key)
     if not tactical_preview:
         logger.info("  Agent 1: requesting tactical preview from Groq LLaMA 3.3…")
-        from src.nexus.agents.analyst import call_llm, build_tactical_prompt
-        from src.nexus.data.scraper import get_team_sentiment
+        from agents.analyst import call_llm, build_tactical_prompt
+        from data.scraper import get_team_sentiment
         logger.info("  Fetching sentiment headlines...")
         home_sentiment = get_team_sentiment(home_team)
         away_sentiment = get_team_sentiment(away_team)
@@ -275,7 +275,7 @@ def run_pipeline(fixture_id=None):
         blended_home_xg *= llm_modifiers.get("home_attack_mod", 1.0) * llm_modifiers.get("away_defense_mod", 1.0)
         blended_away_xg *= llm_modifiers.get("away_attack_mod", 1.0) * llm_modifiers.get("home_defense_mod", 1.0)
         
-        from src.nexus.models.dixon_coles import get_dixon_coles_probs
+        from models.dixon_coles import get_dixon_coles_probs
         dc_probs = get_dixon_coles_probs(blended_home_xg, blended_away_xg)
         p_home = dc_probs["p_home_win"]
         p_draw = dc_probs["p_draw"]
@@ -336,9 +336,9 @@ def run_all_upcoming(limit=104):
 
 
 if __name__ == "__main__":
-    from src.nexus.data.database import init_db
-    from src.nexus.data.scraper  import fetch_and_store_fixtures
-    from src.nexus.core.evaluator import evaluate_all_pending, rebuild_leaderboard, check_and_evaluate_recent
+    from data.database import init_db
+    from data.scraper  import fetch_and_store_fixtures
+    from core.evaluator import evaluate_all_pending, rebuild_leaderboard, check_and_evaluate_recent
     
     init_db()
     fetch_and_store_fixtures()

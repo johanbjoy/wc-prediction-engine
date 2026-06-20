@@ -57,7 +57,7 @@ class DeepStackingEnsemble:
         ]
         
         # Dynamic Router
-        from src.nexus.stacking.model_selector import DynamicModelSelector
+        from stacking.model_selector import DynamicModelSelector
         self.model_selector = DynamicModelSelector()
         
         # Level 2 Meta-Learners
@@ -76,9 +76,9 @@ class DeepStackingEnsemble:
     def fit(self, X: pd.DataFrame, y_home: pd.Series, y_away: pd.Series):
         """Train all base models and meta learners."""
         print("Training Deep Stacking Ensemble...")
-        from src.nexus.models.lightgbm_model import LightGBMModel
-        from src.nexus.models.tabnet_model import TabNetModel
-        from src.nexus.models.temporal_fusion import TemporalFusionTransformer
+        from models.lightgbm_model import LightGBMModel
+        from models.tabnet_model import TabNetModel
+        from models.temporal_fusion import TemporalFusionTransformer
         
         print("  Training LightGBM Models (with Optuna)...")
         self.lgb_home = LightGBMModel(target="home_xg")
@@ -113,9 +113,9 @@ class DeepStackingEnsemble:
         
     def load_models(self, path: str):
         import os
-        from src.nexus.models.lightgbm_model import LightGBMModel
-        from src.nexus.models.tabnet_model import TabNetModel
-        from src.nexus.models.temporal_fusion import TemporalFusionTransformer
+        from models.lightgbm_model import LightGBMModel
+        from models.tabnet_model import TabNetModel
+        from models.temporal_fusion import TemporalFusionTransformer
         
         self.lgb_home = LightGBMModel(target="home_xg").load_model(os.path.join(path, "lgb_home.txt"))
         self.lgb_away = LightGBMModel(target="away_xg").load_model(os.path.join(path, "lgb_away.txt"))

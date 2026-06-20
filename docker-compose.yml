@@ -1,0 +1,32 @@
+services:
+  nexus-api:
+    build: ./api
+    ports: ["8000:8000"]
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+    depends_on:
+      - redis
+      - postgres
+    
+  nexus-streamlit:
+    build: ./app
+    ports: ["8501:8501"]
+    depends_on:
+      - nexus-api
+    
+  nexus-websocket:
+    build: ./inplay
+    ports: ["8765:8765"]
+    environment:
+      - REDIS_URL=${REDIS_URL}
+      
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    
+  postgres:
+    image: supabase/postgres:15
+    ports: ["5432:5432"]
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/

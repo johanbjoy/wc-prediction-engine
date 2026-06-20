@@ -18,8 +18,8 @@ Usage
   evaluate_all_pending()
 """
 import logging
-from src.nexus.data.database import get_connection
-from src.nexus.data.scraper  import fetch_actual_result
+from data.database import get_connection
+from data.scraper  import fetch_actual_result
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +145,7 @@ def evaluate_fixture(fixture_id: int, home_score: int | None = None, away_score:
 
         if scored_count > 0:
             # --- PHASE 7: ADAPTIVE MOMENTUM UPDATE ---
-            from src.nexus.data.database import get_team_momentum, update_team_momentum
+            from data.database import get_team_momentum, update_team_momentum
             
             home_team = fixture["home_team"]
             away_team = fixture["away_team"]

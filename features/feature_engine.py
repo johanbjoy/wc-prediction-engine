@@ -124,8 +124,8 @@ class FeatureEngine:
         
         # 4. Poisson Baseline Integrations (Legacy V3 fusion)
         try:
-            from src.nexus.models.poisson_model import predict as poisson_predict
-            from src.nexus.data.scraper import _baseline_squad
+            from models.poisson_model import predict as poisson_predict
+            from data.scraper import _baseline_squad
             
             home_p = _baseline_squad(home)
             away_p = _baseline_squad(away)

@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 import streamlit as st
-from src.nexus.data.database import get_completed_predictions, get_upcoming_predictions
+from data.database import get_completed_predictions, get_upcoming_predictions
 
 def get_flag(team):
     flags = {

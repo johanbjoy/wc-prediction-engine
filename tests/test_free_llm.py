@@ -4,8 +4,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import os
 from dotenv import load_dotenv
 load_dotenv()
-from src.nexus.agents.analyst import build_tactical_prompt, call_openrouter
-import src.nexus.agents.analyst
+from agents.analyst import build_tactical_prompt, call_openrouter
+import agents.analyst
 
 home_team = "Argentina"
 away_team = "Brazil"

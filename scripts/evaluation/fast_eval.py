@@ -3,23 +3,23 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 # MOCK ALL DB AND API CALLS FIRST
-import src.nexus.data.database as db
+import data.database as db
 db.get_team_players = lambda t: []
 db.get_team_momentum = lambda t: 1.0
 
-import src.nexus.models.nexus_model as nexus_model
+import models.nexus_model as nexus_model
 nexus_model._calculate_rest_days = lambda team, d: 5
 nexus_model.get_team_value_ratio = lambda h, a: 1.0
 nexus_model.get_h2h_streak = lambda h, a: 0
 nexus_model.has_coach_changed_tactics = lambda t: 0
 nexus_model.get_team_momentum = lambda t: 1.0
 
-import src.nexus.data.scraper as scraper
+import data.scraper as scraper
 scraper.fetch_live_odds = lambda h, a: (3.0, 3.0, 3.0)
 scraper.fetch_weather_modifier = lambda x: 1.0
 
-from src.nexus.models.nexus_model import predict
-from src.nexus.data.database import get_connection
+from models.nexus_model import predict
+from data.database import get_connection
 
 conn = get_connection()
 with conn.cursor() as cur:

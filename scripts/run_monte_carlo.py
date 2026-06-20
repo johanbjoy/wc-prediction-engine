@@ -7,8 +7,8 @@ import random
 import time
 from collections import defaultdict
 
-from src.nexus.models.nexus_model import predict
-from src.nexus.data.database import get_connection
+from models.nexus_model import predict
+from data.database import get_connection
 
 # Projected Top 48 Teams for 2026
 TEAMS = [
@@ -30,8 +30,8 @@ def get_elo(team):
 # Memory Cache for predictions to avoid repeating expensive ML model loads & DB calls
 PREDICTION_CACHE = {}
 
-from src.nexus.models.poisson_model import _compute_lambdas
-from src.nexus.models.dixon_coles import get_dixon_coles_probs
+from models.poisson_model import _compute_lambdas
+from models.dixon_coles import get_dixon_coles_probs
 import pandas as pd
 from catboost import CatBoostRegressor
 

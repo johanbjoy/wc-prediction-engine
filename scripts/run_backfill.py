@@ -5,9 +5,9 @@ import json
 import numpy as np
 import logging
 from datetime import datetime
-from src.nexus.data.database import get_connection
-from src.nexus.models.nexus_model import predict
-from src.nexus.core.evaluator import evaluate_all_pending
+from data.database import get_connection
+from models.nexus_model import predict
+from core.evaluator import evaluate_all_pending
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

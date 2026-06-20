@@ -180,7 +180,7 @@ def get_all_tournament_form() -> dict:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     
-    from src.nexus.data.scraper import TEAM_BASELINES
+    from data.scraper import TEAM_BASELINES
     
     forms = get_all_tournament_form()
     

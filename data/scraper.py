@@ -16,7 +16,7 @@ import datetime
 import xml.etree.ElementTree as ET
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
-from src.nexus.data.database import get_connection
+from data.database import get_connection
 
 load_dotenv()
 

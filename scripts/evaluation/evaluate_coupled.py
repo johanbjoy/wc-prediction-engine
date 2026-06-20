@@ -3,8 +3,8 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 import json
 import pandas as pd
-from src.nexus.data.database import get_connection
-from src.nexus.models.nexus_model import predict
+from data.database import get_connection
+from models.nexus_model import predict
 
 conn = get_connection()
 with conn.cursor() as cur:

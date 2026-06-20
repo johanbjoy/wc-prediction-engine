@@ -1,4 +1,4 @@
-from src.nexus.data.database import get_connection
+from data.database import get_connection
 
 conn = get_connection()
 with conn.cursor() as cur:

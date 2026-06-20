@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from orchestrator import run_pipeline
-from src.nexus.data.database import get_connection
+from data.database import get_connection
 
 # Clear cache for the next upcoming match
 conn = get_connection()

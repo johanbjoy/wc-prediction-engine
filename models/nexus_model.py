@@ -4,20 +4,20 @@ Runs Phase 5 Stacked Meta-Learner logic using CatBoost, Dixon-Coles, and Environ
 """
 import os
 import pandas as pd
-from src.nexus.models.poisson_model import predict as get_poisson_baseline
-from src.nexus.models.dixon_coles import get_dixon_coles_probs
-from src.nexus.data.database import get_connection
+from models.poisson_model import predict as get_poisson_baseline
+from models.dixon_coles import get_dixon_coles_probs
+from data.database import get_connection
 
-from src.nexus.stacking.deep_stack import DeepStackingEnsemble
-from src.nexus.features.feature_engine import FeatureEngine
+from stacking.deep_stack import DeepStackingEnsemble
+from features.feature_engine import FeatureEngine
 
 # Elite feature imports
-from src.nexus.data.weather import get_weather_factor
-from src.nexus.data.transfermarkt import get_team_value_ratio
-from src.nexus.data.scraper import get_h2h_streak, has_coach_changed_tactics
+from data.weather import get_weather_factor
+from data.transfermarkt import get_team_value_ratio
+from data.scraper import get_h2h_streak, has_coach_changed_tactics
 
 try:
-    from src.nexus.models.transformer_model import TransformerModel
+    from models.transformer_model import TransformerModel
     TRANSFORMER_AVAILABLE = True
 except ImportError:
     TRANSFORMER_AVAILABLE = False
@@ -60,8 +60,8 @@ def _calculate_rest_days(team: str, current_match_date: str) -> float:
         return 7.0
 
 def predict(home_team: str, away_team: str, tournament: str, current_date: str, elo_home: float, elo_away: float, form_h: float, form_a: float) -> dict:
-    home_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data_store", "models", "nexus_home.cbm"))
-    away_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data_store", "models", "nexus_away.cbm"))
+    home_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data_store", "models", "nexus_home.cbm"))
+    away_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data_store", "models", "nexus_away.cbm"))
     
     # 1. Gather baseline Poisson xG
     # We pass empty player lists since poisson_model uses baseline if players are missing
@@ -78,7 +78,7 @@ def predict(home_team: str, away_team: str, tournament: str, current_date: str, 
     rest_away = _calculate_rest_days(away_team, current_date)
     
     # 4. Phase 5: Stacked CatBoost Prediction (Poisson probabilities mathematically stacked in)
-    from src.nexus.features.feature_engine import FeatureEngine
+    from features.feature_engine import FeatureEngine
     fe = FeatureEngine()
     
     # We must construct a dictionary that mimics the training row structure
@@ -98,14 +98,14 @@ def predict(home_team: str, away_team: str, tournament: str, current_date: str, 
     global _DEEP_STACK
     if '_DEEP_STACK' not in globals():
         try:
-            model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data_store", "models", "v2"))
+            model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data_store", "models", "v2"))
             _DEEP_STACK = DeepStackingEnsemble().load_models(model_dir)
         except Exception as e:
             print(f"Failed to load N.E.X.U.S V2 Deep Stack models: {e}")
             return {}
             
     # Generate unified 80+ features
-    model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data_store", "models", "v2"))
+    model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data_store", "models", "v2"))
     fe = FeatureEngine().load_cache(model_dir)
     features = fe.generate_features(pd.DataFrame([{
         "home_team": home_team, "away_team": away_team, "tournament": tournament, "neutral": 1

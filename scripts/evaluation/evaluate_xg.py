@@ -3,8 +3,8 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 import json
 import pandas as pd
-from src.nexus.data.database import get_connection
-from src.nexus.models.nexus_model import predict
+from data.database import get_connection
+from models.nexus_model import predict
 
 conn = get_connection()
 with conn.cursor() as cur:
@@ -21,7 +21,7 @@ for f in rows:
     if not res: continue
     
     # Use the ML xG as the new lambdas for Dixon-Coles
-    from src.nexus.models.dixon_coles import get_dixon_coles_probs
+    from models.dixon_coles import get_dixon_coles_probs
     lam_h = res["nexus_home_xg"]
     lam_a = res["nexus_away_xg"]
     

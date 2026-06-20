@@ -4,8 +4,8 @@ import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.nexus.features.feature_engine import FeatureEngine
-from src.nexus.stacking.deep_stack import DeepStackingEnsemble
+from features.feature_engine import FeatureEngine
+from stacking.deep_stack import DeepStackingEnsemble
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────
 LOCAL_CSV = os.path.join(os.path.dirname(__file__), "..", "data_store", "databases", "results.csv")

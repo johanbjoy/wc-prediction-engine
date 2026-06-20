@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import json
 import os
 import random
-from src.nexus.models.nexus_model import predict
+from models.nexus_model import predict
 
 # Projected Top 48 Teams for 2026 (based on current/historical FIFA rankings)
 TEAMS = [
@@ -25,7 +25,7 @@ def get_elo(team):
     return base + random.randint(-50, 50)
 
 def get_real_match_result(home, away):
-    from src.nexus.data.database import get_connection
+    from data.database import get_connection
     conn = get_connection()
     try:
         with conn.cursor() as cur:
