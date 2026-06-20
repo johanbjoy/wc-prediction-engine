@@ -11,11 +11,11 @@ def render_calibration_reliability():
         line=dict(color='#9ca3af', dash='dash')
     ))
     
-    # V4 Venn-ABERS Calibrated
+    # V2 Venn-ABERS Calibrated
     fig.add_trace(go.Scatter(
         x=[0.1, 0.3, 0.5, 0.7, 0.9], 
         y=[0.09, 0.31, 0.49, 0.72, 0.89], 
-        mode='lines+markers', name='V4 Deep Stack (Venn-ABERS)',
+        mode='lines+markers', name='V2 Deep Stack (Venn-ABERS)',
         line=dict(color='#10b981', width=3),
         marker=dict(size=8)
     ))

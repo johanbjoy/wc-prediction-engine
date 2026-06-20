@@ -1,3 +1,8 @@
+import sys, os
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
 import streamlit as st
 from app.components.css import apply_command_center_css
 from app.components.utils import load_worldcup_data
@@ -6,7 +11,7 @@ from app.components.calibration_chart import render_calibration_reliability
 st.set_page_config(page_title="NEXUS Dashboard", page_icon="⚡", layout="wide")
 apply_command_center_css()
 
-st.markdown('<div class="header-text">N.E.X.U.S. V4</div>', unsafe_allow_html=True)
+st.markdown('<div class="header-text">N.E.X.U.S. V2</div>', unsafe_allow_html=True)
 st.markdown('<div class="subheader-text">Sovereign Intelligence Engine | Command Center</div>', unsafe_allow_html=True)
 
 df = load_worldcup_data()
@@ -49,7 +54,7 @@ col_a, col_b = st.columns([1, 1])
 with col_a:
     st.subheader("System Architecture")
     st.markdown("""
-    **V4 Deep Stacking Pipeline:**
+    **V2 Deep Stacking Pipeline:**
     - **Dynamic Model Selection**: AI chooses optimal model subset per match context.
     - **Multi-Modal Ensemble**: Combining LightGBM, PyTorch TabNet, and Temporal Fusion Transformers.
     - **Causal Inference**: Uses Propensity Score Matching (PSM) to isolate true team momentum.
