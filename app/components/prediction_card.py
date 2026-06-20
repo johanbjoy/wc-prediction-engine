@@ -3,7 +3,10 @@ import pandas as pd
 from .utils import get_flag
 
 def render_prediction_card(row):
-    date = row['match_date']
+    try:
+        date = row['match_date'].strftime('%b %d, %Y • %I:%M %p IST')
+    except AttributeError:
+        date = str(row['match_date']) + " IST"
     home = row['home_team']
     away = row['away_team']
     pred_h = row['pred_h_score']
