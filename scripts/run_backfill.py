@@ -42,46 +42,28 @@ def run_backfill():
                 if not result:
                     continue
                     
-                probs = result.get("blended_probs", result.get("dixon_coles_probs", {}))
+                probs = result.get("dixon_coles_probs", {})
                 ph = probs.get("p_home_win", 0.33)
                 pd = probs.get("p_draw", 0.33)
                 pa = probs.get("p_away_win", 0.33)
-                # Extract most likely scoreline matching the highest probability outcome
-                dc_dict = result.get("dixon_coles_probs", {})
-                matrix = dc_dict.get("matrix", None)
                 
-                if matrix is not None:
-                    matrix_arr = np.array(matrix)
-                    
-                    # 1. Determine the outcome based on aggregated probabilities
-                    outcome = "H" if ph > max(pa, pd) else "A" if pa > max(ph, pd) else "D"
-                    
-                    # 2. Mask the matrix so we only consider scorelines matching the outcome
-                    mask = np.zeros_like(matrix_arr, dtype=bool)
-                    for i in range(matrix_arr.shape[0]):
-                        for j in range(matrix_arr.shape[1]):
-                            if outcome == "H" and i > j: mask[i, j] = True
-                            elif outcome == "A" and i < j: mask[i, j] = True
-                            elif outcome == "D" and i == j: mask[i, j] = True
-                            
-                    masked_matrix = matrix_arr * mask
-                    flat_idx = np.argmax(masked_matrix)
-                    pred_h, pred_a = np.unravel_index(flat_idx, masked_matrix.shape)
-                    pred_h, pred_a = int(pred_h), int(pred_a)
-                else:
-                    # Fallback
-                    base_h = result.get("nexus_home_xg", 1.0)
-                    base_a = result.get("nexus_away_xg", 1.0)
-                    pred_h = int(round(base_h))
-                    pred_a = int(round(base_a))
-                    
-                    if pa > ph and pa > pd and pred_a <= pred_h:
-                        pred_a = pred_h + 1
-                    elif ph > pa and ph > pd and pred_h <= pred_a:
-                        pred_h = pred_a + 1
-                    elif pd > ph and pd > pa and pred_h != pred_a:
-                        pred_h = max(pred_h, pred_a)
-                        pred_a = pred_h
+                # Probability Extraction Logic from the Spec:
+                # The exact predicted scoreline is rounded from the blended expected goals (xG), 
+                # and boundary-checked against the highest predicted outcome.
+                
+                base_h = result.get("nexus_home_xg", 1.0)
+                base_a = result.get("nexus_away_xg", 1.0)
+                pred_h = int(round(base_h))
+                pred_a = int(round(base_a))
+                
+                # Boundary checking against highest probability mass
+                if pa > ph and pa > pd and pred_a <= pred_h:
+                    pred_a = pred_h + 1
+                elif ph > pa and ph > pd and pred_h <= pred_a:
+                    pred_h = pred_a + 1
+                elif pd > ph and pd > pa and pred_h != pred_a:
+                    pred_h = max(pred_h, pred_a)
+                    pred_a = pred_h
                     
                 class NumpyEncoder(json.JSONEncoder):
                     def default(self, obj):
