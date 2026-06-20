@@ -1,8 +1,11 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from agents.analyst import build_tactical_prompt, call_openrouter
+from src.nexus.agents.analyst import build_tactical_prompt, call_openrouter
 
 # Mock players
 home_team = "Argentina"
@@ -22,7 +25,7 @@ print("Building Prompt...")
 prompt = build_tactical_prompt(home_team, away_team, home_players, away_players)
 
 # Re-initialize the key now that dotenv is loaded
-import agents.analyst
+import src.nexus.agents.analyst
 agents.analyst.OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "")
 
 # Test DeepSeek R1
