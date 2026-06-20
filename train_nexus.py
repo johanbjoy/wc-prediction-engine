@@ -3,11 +3,20 @@ train_nexus.py — The N.E.X.U.S. Engine Overhaul Training Script
 Phase 1-5 integrated: CatBoost with environmental context and Dixon-Coles stacked inputs.
 """
 import os
+import json
+import logging
 import pandas as pd
 import numpy as np
 from catboost import CatBoostRegressor
 from sklearn.model_selection import KFold
 from models.dixon_coles import get_dixon_coles_probs
+
+# Phase 4: Import PyTorch Transformer
+try:
+    from models.transformer_model import TransformerModel
+    TRANSFORMER_AVAILABLE = True
+except ImportError:
+    TRANSFORMER_AVAILABLE = False
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────
 LOCAL_CSV = os.path.join(os.path.dirname(__file__), "results.csv")
@@ -95,13 +104,23 @@ def _engineer_features(full_df: pd.DataFrame, comp_df: pd.DataFrame) -> pd.DataF
             "form_home": form_h,
             "form_away": form_a,
             "form_diff": form_h - form_a,
+            
+            # Phase 2 Elite Features (Defaulted to neutral for historical backfill)
+            "team_value_ratio": 1.0,
+            "h2h_streak": 0,
+            "momentum_decay": form_h * 0.9, # Historical approximation
+            "weather_factor": 1.0,
+            "coach_tactic": 0,
+            
             "p_home_win": probs["p_home_win"],
             "p_draw": probs["p_draw"],
             "p_away_win": probs["p_away_win"],
             "is_neutral": is_neutral,
             "sample_weight": weight,
             "home_score": row["home_score"],
-            "away_score": row["away_score"]
+            "away_score": row["away_score"],
+            "home_xg": row["home_xg"],
+            "away_xg": row["away_xg"]
         })
         
     return pd.DataFrame(rows)
@@ -117,22 +136,41 @@ def train_nexus_models():
     df["date"] = pd.to_datetime(df["date"])
     df = df.sort_values("date").reset_index(drop=True)
     
-    # Filter out friendlies and pre-2000 matches for the competitive dataset
-    comp_df = df[(df["tournament"] != "Friendly") & (df["date"] >= "2000-01-01")].reset_index(drop=True)
+    # Merge StatsBomb xG data if available
+    xg_path = "statsbomb_data/xg_data.csv"
+    if os.path.exists(xg_path):
+        xg_df = pd.read_csv(xg_path)
+        xg_df["date"] = pd.to_datetime(xg_df["match_date"])
+        
+        # Merge left to keep all historical matches
+        df = df.merge(xg_df[["date", "home_team", "away_team", "home_xg", "away_xg"]], 
+                      on=["date", "home_team", "away_team"], how="left")
+        
+        # Fallback to real goals if xG is missing
+        df["home_xg"] = df["home_xg"].fillna(df["home_score"])
+        df["away_xg"] = df["away_xg"].fillna(df["away_score"])
+    else:
+        df["home_xg"] = df["home_score"]
+        df["away_xg"] = df["away_score"]
+    
+    # Use full dataset including friendlies and pre-2000 matches to see if accuracy improves
+    comp_df = df.reset_index(drop=True)
     
     features_df = _engineer_features(df, comp_df)
     
     # CatBoost native categorical handling
     cat_features = ["home_team", "away_team", "tournament"]
     
-    X = features_df.drop(columns=["home_score", "away_score", "date", "sample_weight"])
-    y_home = features_df["home_score"]
-    y_away = features_df["away_score"]
+    X = features_df.drop(columns=["home_score", "away_score", "home_xg", "away_xg", "date", "sample_weight"])
+    y_home = features_df["home_xg"]
+    y_away = features_df["away_xg"]
     weights = features_df["sample_weight"]
     
     # K-Fold CV averaging
     kf = KFold(n_splits=5, shuffle=True, random_state=42)
     
+    # Note: Phase 3 Isotonic Calibration is typically for Classifiers. 
+    # Since we predict xG (Regression), we maintain KFold ensemble robustness.
     print(f"  Training CatBoost Home Model using 5-Fold CV on {len(X)} rows...")
     model_home = CatBoostRegressor(iterations=800, learning_rate=0.03, depth=6, verbose=0)
     # We will fit on the entire dataset, but since we are replacing it, we'll just rely on CatBoost's early stopping if we passed eval_set. 
@@ -147,6 +185,18 @@ def train_nexus_models():
     model_home.save_model(os.path.join(SAVE_DIR, "nexus_home.cbm"))
     model_away.save_model(os.path.join(SAVE_DIR, "nexus_away.cbm"))
     print("  ✓ CatBoost Models saved successfully.")
+
+    if TRANSFORMER_AVAILABLE:
+        print("  Training PyTorch Transformer Home Model...")
+        transformer_home = TransformerModel()
+        transformer_home.fit(X, y_home, epochs=20)
+        transformer_home.save_model(os.path.join(SAVE_DIR, "nexus_home.pt"))
+        
+        print("  Training PyTorch Transformer Away Model...")
+        transformer_away = TransformerModel()
+        transformer_away.fit(X, y_away, epochs=20)
+        transformer_away.save_model(os.path.join(SAVE_DIR, "nexus_away.pt"))
+        print("  ✓ PyTorch Transformer Models saved successfully.")
 
 if __name__ == "__main__":
     train_nexus_models()

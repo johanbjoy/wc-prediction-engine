@@ -39,23 +39,22 @@ def run_backfill():
         pd = probs.get("p_draw", 0.33)
         pa = probs.get("p_away_win", 0.33)
         
-        # Calculate exact scores dynamically from xG
-        base_h = result.get("nexus_home_xg", 1.0)
-        base_a = result.get("nexus_away_xg", 1.0)
-        pred_h = int(round(base_h))
-        pred_a = int(round(base_a))
-        
-        # Ensure predicted outcome matches highest probability to preserve the 60.7% outcome accuracy
-        if pa > ph and pa > pd and pred_a <= pred_h:
-            # Force away win exact score
-            pred_a = pred_h + 1
-        elif ph > pa and ph > pd and pred_h <= pred_a:
-            # Force home win exact score
-            pred_h = pred_a + 1
-        elif pd > ph and pd > pa and pred_h != pred_a:
-            # Force draw exact score
-            pred_h = max(pred_h, pred_a)
-            pred_a = pred_h
+        matrix = np.array(probs.get("matrix", []))
+        if matrix.size > 0:
+            pred_h, pred_a = np.unravel_index(np.argmax(matrix), matrix.shape)
+            pred_h, pred_a = int(pred_h), int(pred_a)
+        else:
+            base_h = result.get("nexus_home_xg", 1.0)
+            base_a = result.get("nexus_away_xg", 1.0)
+            pred_h = int(round(base_h))
+            pred_a = int(round(base_a))
+            if pa > ph and pa > pd and pred_a <= pred_h:
+                pred_a = pred_h + 1
+            elif ph > pa and ph > pd and pred_h <= pred_a:
+                pred_h = pred_a + 1
+            elif pd > ph and pd > pa and pred_h != pred_a:
+                pred_h = max(pred_h, pred_a)
+                pred_a = pred_h
             
         class NumpyEncoder(json.JSONEncoder):
             def default(self, obj):
@@ -99,7 +98,7 @@ def run_backfill():
                     WHEN (p.predicted_home_score = p.predicted_away_score AND f.real_home_score = f.real_away_score) THEN 1
                     ELSE 0 END
                 FROM fixtures f
-                WHERE p.fixture_id = f.id AND p.model_name = 'nexus_v2'
+                WHERE p.fixture_id = f.id AND p.model_name = 'nexus_v2' AND f.status IN ('FT', 'AET', 'PEN')
             """)
         conn.commit()
     finally:

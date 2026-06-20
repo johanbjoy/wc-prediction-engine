@@ -274,15 +274,34 @@ def run_pipeline(fixture_id=None):
     if llm_modifiers:
         blended_home_xg *= llm_modifiers.get("home_attack_mod", 1.0) * llm_modifiers.get("away_defense_mod", 1.0)
         blended_away_xg *= llm_modifiers.get("away_attack_mod", 1.0) * llm_modifiers.get("home_defense_mod", 1.0)
+        
+        from models.dixon_coles import get_dixon_coles_probs
+        dc_probs = get_dixon_coles_probs(blended_home_xg, blended_away_xg)
+        p_home = dc_probs["p_home_win"]
+        p_draw = dc_probs["p_draw"]
+        p_away = dc_probs["p_away_win"]
+        final_pred["model_meta"].update({
+            "lam_home": round(blended_home_xg, 3),
+            "lam_away": round(blended_away_xg, 3),
+            "p_home_win": p_home, "p_draw": p_draw, "p_away_win": p_away
+        })
 
-    import math
-    ROUND_BIAS = -0.10  # Backtested: avoids over-predicting goals in tight matches
-    home_score = max(0, int(math.floor(blended_home_xg + 0.5 + ROUND_BIAS)))
-    away_score = max(0, int(math.floor(blended_away_xg + 0.5 + ROUND_BIAS)))
+    import numpy as np
+    matrix = np.array(dc_probs.get("matrix", []))
+    
+    if matrix.size > 0:
+        home_score, away_score = np.unravel_index(np.argmax(matrix), matrix.shape)
+    else:
+        import math
+        ROUND_BIAS = -0.10
+        home_score = max(0, int(math.floor(blended_home_xg + 0.5 + ROUND_BIAS)))
+        away_score = max(0, int(math.floor(blended_away_xg + 0.5 + ROUND_BIAS)))
+        
+    home_score, away_score = int(home_score), int(away_score)
 
-    if home_score > away_score:
+    if p_home > p_away and p_home > p_draw:
         predicted_winner = home_team
-    elif away_score > home_score:
+    elif p_away > p_home and p_away > p_draw:
         predicted_winner = away_team
     else:
         predicted_winner = "Draw"
@@ -304,7 +323,7 @@ def run_pipeline(fixture_id=None):
     return {"fixture_id": fid, "home_team": home_team, "away_team": away_team, "prediction": final_pred, "poisson_meta": meta, "model_name": model_tag}
 
 
-def run_all_upcoming(limit=4):
+def run_all_upcoming(limit=104):
     results = []
     for f in get_upcoming_fixtures(limit):
         result = run_pipeline(fixture_id=f["id"])
@@ -329,7 +348,7 @@ if __name__ == "__main__":
     rebuild_leaderboard()
     
     print("\n" + "─" * 50)
-    results = run_all_upcoming(limit=4)
+    results = run_all_upcoming(limit=104)
     print("\n" + "─" * 50)
     print("PREDICTIONS")
     for r in results:

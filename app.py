@@ -156,6 +156,19 @@ body {
     align-items: center;
     position: relative;
 }
+
+@media (max-width: 768px) {
+    .header-text { font-size: 3rem !important; margin-top: 10px; }
+    .subheader-text { font-size: 0.9rem; margin-bottom: 15px; }
+    div[data-testid="stMetricValue"] { font-size: 1.8rem !important; }
+    .score-team { font-size: 1rem; }
+    .score-actual { font-size: 1.5rem; }
+    .score-card { flex-direction: column; padding: 15px; }
+    .score-center { margin: 10px 0; }
+    .score-home, .score-away { text-align: center; width: 100%; }
+}
+
+
 .score-center::before {
     content: '';
     position: absolute;
@@ -313,57 +326,44 @@ body {
 # ============================================
 def get_flag(team):
     flags = {
-        "Mexico": "🇲🇽", "Canada": "🇨🇦", "USA": "🇺🇸", "Brazil": "🇧🇷", "Argentina": "🇦🇷",
+                "Mexico": "🇲🇽", "Canada": "🇨🇦", "USA": "🇺🇸", "United States": "🇺🇸", "Brazil": "🇧🇷", "Argentina": "🇦🇷",
         "France": "🇫🇷", "Germany": "🇩🇪", "Spain": "🇪🇸", "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "Portugal": "🇵🇹",
         "Italy": "🇮🇹", "Netherlands": "🇳🇱", "Belgium": "🇧🇪", "Croatia": "🇭🇷", "Uruguay": "🇺🇾",
-        "Colombia": "🇨🇴", "Japan": "🇯🇵", "South Korea": "🇰🇷", "Senegal": "🇸🇳", "Morocco": "🇲🇦",
-        "Switzerland": "🇨🇭", "Ecuador": "🇪🇨", "Ghana": "🇬🇭", "Cameroon": "🇨🇲", "Iran": "🇮🇷",
+        "Colombia": "🇨🇴", "Japan": "🇯🇵", "South Korea": "🇰🇷", "Korea Republic": "🇰🇷", "Senegal": "🇸🇳", "Morocco": "🇲🇦",
+        "Switzerland": "🇨🇭", "Ecuador": "🇪🇨", "Ghana": "🇬🇭", "Cameroon": "🇨🇲", "Iran": "🇮🇷", "IR Iran": "🇮🇷",
         "Saudi Arabia": "🇸🇦", "Australia": "🇦🇺", "Tunisia": "🇹🇳", "Wales": "🏴󠁧󠁢󠁷󠁬󠁳󠁿", "Poland": "🇵🇱",
         "Serbia": "🇷🇸", "Denmark": "🇩🇰", "Costa Rica": "🇨🇷", "Sweden": "🇸🇪", "Peru": "🇵🇪",
-        "Chile": "🇨🇱", "Nigeria": "🇳🇬", "Egypt": "🇪🇬", "Ivory Coast": "🇨🇮", "Algeria": "🇩🇿",
-        "DR Congo": "🇨🇩", "South Africa": "🇿🇦", "Mali": "🇲🇱", "Bosnia & Herzegovina": "🇧🇦",
+        "Chile": "🇨🇱", "Nigeria": "🇳🇬", "Egypt": "🇪🇬", "Ivory Coast": "🇨🇮", "Côte d'Ivoire": "🇨🇮", "Algeria": "🇩🇿",
+        "DR Congo": "🇨🇩", "Democratic Republic of the Congo": "🇨🇩", "South Africa": "🇿🇦", "Mali": "🇲🇱", 
+        "Bosnia & Herzegovina": "🇧🇦", "Bosnia and Herzegovina": "🇧🇦",
         "Czech Republic": "🇨🇿", "Norway": "🇳🇴", "Qatar": "🇶🇦", "Uzbekistan": "🇺🇿",
         "Jordan": "🇯🇴", "New Zealand": "🇳🇿", "Panama": "🇵🇦", "Cape Verde": "🇨🇻", "Curaçao": "🇨🇼",
-        "Jamaica": "🇯🇲", "Honduras": "🇭🇳", "El Salvador": "🇸🇻", "Iraq": "🇮🇶"
+        "Jamaica": "🇯🇲", "Honduras": "🇭🇳", "El Salvador": "🇸🇻", "Iraq": "🇮🇶",
+        "Paraguay": "🇵🇾", "Venezuela": "🇻🇪", "Bolivia": "🇧🇴", "Turkey": "🇹🇷", "Türkiye": "🇹🇷", "Ukraine": "🇺🇦",
+        "Scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "Oman": "🇴🇲", "UAE": "🇦🇪", "United Arab Emirates": "🇦🇪", "Bahrain": "🇧🇭", "China": "🇨🇳", "China PR": "🇨🇳",
+        "Syria": "🇸🇾", "Thailand": "🇹🇭", "Vietnam": "🇻🇳", "North Korea": "🇰🇵", "Lebanon": "🇱🇧",
+        "Palestine": "🇵🇸", "India": "🇮🇳", "Tajikistan": "🇹🇯", "Kyrgyzstan": "🇰🇬", "Kuwait": "🇰🇼",
+        "Indonesia": "🇮🇩", "Malaysia": "🇲🇾", "Angola": "🇦🇴", "Burkina Faso": "🇧🇫", "Equatorial Guinea": "🇬🇶",
+        "Gabon": "🇬🇦", "Guinea": "🇬🇳", "Zambia": "🇿🇲", "Uganda": "🇺🇬", "Kenya": "🇰🇪",
+        "Iceland": "🇮🇸", "Ireland": "🇮🇪", "Republic of Ireland": "🇮🇪", "Northern Ireland": "🇬🇧", "Austria": "🇦🇹", "Hungary": "🇭🇺",
+        "Slovakia": "🇸🇰", "Slovenia": "🇸🇮", "Romania": "🇷🇴", "Bulgaria": "🇧🇬", "Greece": "🇬🇷",
+        "Finland": "🇫🇮", "Albania": "🇦🇱", "Georgia": "🇬🇪", "Armenia": "🇦🇲", "Israel": "🇮🇱",
+        "Guatemala": "🇬🇹", "Trinidad and Tobago": "🇹🇹", "Haiti": "🇭🇹", "North Macedonia": "🇲🇰", "Macedonia": "🇲🇰" 
     }
     return flags.get(team, "🏳️")
 
-st.markdown('<div class="header-text" style="font-size: 5rem; letter-spacing: -2px; margin-top: 20px;">N.E.X.U.S.</div>', unsafe_allow_html=True)
-st.markdown('<div class="subheader-text">AI-Powered Football Prediction Engine | CatBoost + Transformer Hybrid</div>', unsafe_allow_html=True)
+st.markdown('<div class="header-text" style="font-size: clamp(3rem, 8vw, 5rem); letter-spacing: -2px; margin-top: 20px;">N.E.X.U.S.</div>', unsafe_allow_html=True)
+st.markdown('<div class="subheader-text">AI-Powered Football Analytics | World Cup 2026</div>', unsafe_allow_html=True)
 
+with st.expander("ℹ️ How Predictions Are Made (N.E.X.U.S. V3)"):
+    st.markdown("""
+    **The Prediction Pipeline:**
+    1. **Full History Model**: A stacked CatBoost Machine Learning model was trained on nearly **50,000 matches**, encompassing all competitive international matches from the year 2000 onwards.
+    2. **Contextual Analysis**: The engine calculates real-time Elo rating differentials, short-term tournament form, and contextual features to predict an exact **Expected Goals (xG)** value for both teams.
+    3. **Dixon-Coles Probability Matrix**: The refined xG is fed into a mathematical algorithm (Dixon-Coles) which generates a probability matrix of every possible exact score (e.g., 0-0, 1-0, 2-1).
+    4. **Unmasked Score Extraction**: To maximize leaderboard points, N.E.X.U.S. identifies the single absolute highest probability score cell from the matrix and locks it in as the Exact Score prediction.
+    """)
 
-# ============================================
-# LIVE ENGINE CONSOLE
-# ============================================
-st.markdown("### ⚡ Live Autonomous Engine Status")
-log_content = ""
-try:
-    with open("nexus.log", "r") as f:
-        lines = f.readlines()[-20:] # Get last 20 lines
-        for line in lines:
-            line = line.strip()
-            if not line: continue
-            time_str = datetime.now().strftime("%H:%M:%S")
-            if "WARNING" in line:
-                log_content += f'<div class="log-line"><span class="log-time">[{time_str}]</span><span class="log-model">N.E.X.U.S.</span><span class="log-warn">{line}</span></div>'
-            elif "ERROR" in line:
-                log_content += f'<div class="log-line"><span class="log-time">[{time_str}]</span><span class="log-model">N.E.X.U.S.</span><span class="log-err">{line}</span></div>'
-            else:
-                log_content += f'<div class="log-line"><span class="log-time">[{time_str}]</span><span class="log-model">N.E.X.U.S.</span><span>{line}</span></div>'
-except Exception:
-    time_str = datetime.now().strftime("%H:%M:%S")
-    log_content = f'<div class="log-line"><span class="log-time">[{time_str}]</span><span class="log-model">N.E.X.U.S.</span><span>SYSTEM INITIALIZED. Awaiting live data stream...</span></div>'
-
-st.markdown(f"""
-<div class="log-console" id="logConsole">
-    {log_content}
-    <div class="log-line"><span class="log-time">[{datetime.now().strftime("%H:%M:%S")}]</span><span class="log-model">SYSTEM</span><span>Watching for pipeline triggers...</span><span class="blinking-cursor"></span></div>
-</div>
-<script>
-    var consoleDiv = document.getElementById("logConsole");
-    consoleDiv.scrollTop = consoleDiv.scrollHeight;
-</script>
-""", unsafe_allow_html=True)
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ============================================
@@ -555,9 +555,9 @@ if len(filtered_df) == 0:
     st.stop()
 
 # ============================================
-# TABS: HISTORY, UPCOMING, SIMULATION
+# TABS: HISTORY, UPCOMING, SIMULATION, MONTE CARLO
 # ============================================
-tab1, tab2, tab3 = st.tabs(["📜 Prediction History", "📅 Upcoming Matches", "🏆 Projected Bracket"])
+tab1, tab2, tab3, tab4 = st.tabs(["📜 Prediction History", "📅 Upcoming Matches", "🏆 Projected Bracket", "🎲 Monte Carlo"])
 
 # ============================================
 # TAB 1: PREDICTION HISTORY
@@ -762,6 +762,54 @@ with tab3:
                     
     else:
         st.info("The Tournament Simulation is currently compiling. Please check back in a few minutes when the backfill is complete.")
+
+# ============================================
+# TAB 4: MONTE CARLO PROBABILITIES
+# ============================================
+with tab4:
+    st.subheader("🎲 Monte Carlo Win Probabilities")
+    st.markdown("This section aggregates 1,000 independent autonomous simulations of the World Cup to determine the true probability of each team advancing through the stages.")
+    
+    mc_file = "monte_carlo_results.json"
+    if os.path.exists(mc_file):
+        with open(mc_file, "r") as f:
+            mc_data = json.load(f).get("data", [])
+            
+        if mc_data:
+            # Create a beautiful dataframe for display
+            display_rows = []
+            for row in mc_data:
+                team = row["team"]
+                display_rows.append({
+                    "Team": f"{get_flag(team)} {team}",
+                    "🏆 Win World Cup": f"{row['win_prob']:.1%}",
+                    "🥈 Reach Final": f"{row['final_prob']:.1%}",
+                    "🥉 Reach Semi-Finals": f"{row['semi_prob']:.1%}",
+                    "🚀 Reach Knockouts": f"{row['knockout_prob']:.1%}"
+                })
+                
+            df_mc = pd.DataFrame(display_rows)
+            st.dataframe(df_mc, use_container_width=True, hide_index=True)
+            
+            # Simple bar chart for Win Probability
+            st.markdown("### Top Contenders (Win Probability)")
+            top_teams = mc_data[:10]
+            fig = px.bar(
+                x=[t["team"] for t in top_teams],
+                y=[t["win_prob"] for t in top_teams],
+                labels={'x': 'Team', 'y': 'Win Probability'},
+                title="Top 10 Favorites to win the 2026 World Cup"
+            )
+            fig.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#cbd5e1',
+                yaxis_tickformat='.1%'
+            )
+            fig.update_traces(marker_color='#3b82f6')
+            st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("Monte Carlo simulation is currently running. Results will appear here once 1,000 iterations are completed.")
 
 # ============================================
 # FOOTER

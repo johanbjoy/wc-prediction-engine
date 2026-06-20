@@ -11,7 +11,7 @@ GROK_KEY = os.getenv("GROK_API_KEY", "")
 GROQ_KEY = os.getenv("GROQ_API_KEY", "")
 GEMINI_MODEL = "gemini-2.5-flash"
 GROK_MODEL = "grok-2-latest"
-GROQ_MODEL = "llama3-8b-8192"
+GROQ_MODEL = "llama-3.3-70b-versatile"
 
 def _validated_mods(mods: dict, fallback: dict) -> dict:
     valid = {}

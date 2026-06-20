@@ -253,7 +253,7 @@ def predict(
       }
     """
     lam_h, lam_a = _compute_lambdas(home_team, away_team, home_players, away_players)
-    result = _simulate_match(lam_h, lam_a, num_simulations=10000, llm_modifiers=llm_modifiers, is_knockout=is_knockout)
+    result = _simulate_match(lam_h, lam_a, num_simulations=500, llm_modifiers=llm_modifiers, is_knockout=is_knockout)
     h, a   = result["predicted_home_score"], result["predicted_away_score"]
     winner = home_team if h > a else (away_team if a > h else "Draw")
 
