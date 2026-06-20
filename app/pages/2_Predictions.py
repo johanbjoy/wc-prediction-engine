@@ -16,7 +16,7 @@ st.title("🎯 Upcoming Match Predictions")
 st.markdown("Deep Stack ensemble predictions powered by LightGBM, TabNet, and TFT.")
 
 df = load_worldcup_data()
-df_upcoming = df[df['is_upcoming']].sort_values('match_date')
+df_upcoming = df[df['is_upcoming']].sort_values('_sort_date')
 
 if len(df_upcoming) == 0:
     st.info("No upcoming matches currently scheduled.")

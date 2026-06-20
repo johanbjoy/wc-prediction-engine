@@ -119,7 +119,7 @@ def load_worldcup_data():
         
     df = pd.DataFrame(all_rows)
     if len(df) > 0:
-        df['match_date'] = pd.to_datetime(df['match_date'].astype(str).str.replace(' UTC', ':00', regex=False), utc=True).dt.tz_convert('Asia/Kolkata')
+        df['_sort_date'] = pd.to_datetime(df['match_date'].astype(str).str.replace(' UTC', ':00', regex=False), utc=True)
     else:
         return pd.DataFrame(columns=[
             'match_id', 'match_date', 'home_team', 'away_team', 'stage', 

@@ -15,7 +15,7 @@ st.title("📜 Match History & Evaluation")
 st.markdown("Full historical timeline of predictions graded against real-world actual outcomes.")
 
 df = load_worldcup_data()
-df_comp = df[~df['is_upcoming']].sort_values('match_date', ascending=False)
+df_comp = df[~df['is_upcoming']].sort_values('_sort_date', ascending=False)
 
 if len(df_comp) == 0:
     st.info("No historical data available.")
@@ -27,8 +27,7 @@ else:
         with col1:
             st.markdown(f"""
             <div style="font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-secondary); margin-top: 20px;">
-                {row['match_date'].strftime('%A, %b %d')}<br>
-                <span style="color: var(--accent-cyan);">{row['match_date'].strftime('%I:%M %p IST')}</span>
+                <span style="color: var(--accent-cyan);">{str(row['match_date'])}</span>
             </div>
             """, unsafe_allow_html=True)
             
