@@ -38,6 +38,23 @@ def load_worldcup_data():
     
     all_rows = []
     
+    def _parse_match_date(date_str):
+        try:
+            if 'UTC' in date_str:
+                parts = date_str.split(' UTC')
+                base_time = pd.to_datetime(parts[0])
+                offset_str = parts[1]
+                if offset_str:
+                    offset_hours = int(offset_str)
+                    utc_time = base_time - pd.Timedelta(hours=offset_hours)
+                else:
+                    utc_time = base_time
+                return utc_time.tz_localize('UTC')
+            else:
+                return pd.to_datetime(date_str, utc=True)
+        except Exception:
+            return pd.NaT
+
     for row in comp + upc:
         probs = {}
         if isinstance(row.get("meta_json"), str):
@@ -78,10 +95,10 @@ def load_worldcup_data():
             elif a_score > h_score: actual_out = 'A'
             else: actual_out = 'D'
             
-        try:
-            m_date = pd.to_datetime(row.get("match_date", ""))
-        except:
-            m_date = pd.to_datetime("2026-06-01 15:00:00")
+        raw_date = str(row.get("match_date", ""))
+        m_date = _parse_match_date(raw_date)
+        if pd.isna(m_date):
+            m_date = pd.to_datetime("2026-06-01 15:00:00", utc=True)
             
         is_upcoming = actual_out is None
         
@@ -118,25 +135,9 @@ def load_worldcup_data():
         })
         
     df = pd.DataFrame(all_rows)
-    def _parse_match_date(date_str):
-        try:
-            if 'UTC' in date_str:
-                parts = date_str.split(' UTC')
-                base_time = pd.to_datetime(parts[0])
-                offset_str = parts[1]
-                if offset_str:
-                    offset_hours = int(offset_str)
-                    utc_time = base_time - pd.Timedelta(hours=offset_hours)
-                else:
-                    utc_time = base_time
-                return utc_time.tz_localize('UTC')
-            else:
-                return pd.to_datetime(date_str, utc=True)
-        except Exception:
-            return pd.NaT
 
     if len(df) > 0:
-        df['_sort_date'] = df['match_date'].astype(str).apply(_parse_match_date)
+        df['_sort_date'] = df['match_date']
     else:
         return pd.DataFrame(columns=[
             'match_id', 'match_date', 'home_team', 'away_team', 'stage', 
